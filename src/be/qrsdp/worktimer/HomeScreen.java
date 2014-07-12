@@ -1,11 +1,11 @@
 package be.qrsdp.worktimer;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -28,9 +28,14 @@ public class HomeScreen extends Activity {
         
         getGuiElementsFromLayout();
         
+        //Button
         atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
-        atWorkBtn.setPressed(app.isAtWork());
+        //atWorkBtn.setPressed(app.isAtWork());
+        atWorkBtn.setBackgroundColor(app.isAtWork() ? Color.BLUE : Color.LTGRAY);
         atWorkBtn.setOnClickListener(atWorkBtnListener);
+        
+        //Logs
+        logsTextView.setText(app.getLastLogs());
     }
 
 	@Override
@@ -43,11 +48,17 @@ public class HomeScreen extends Activity {
 	private OnClickListener atWorkBtnListener = new OnClickListener() {
 	    public void onClick(View v) {
 	      app.toggle();
-	      //Change look of the botton
+	      //Change look of the button
 	      atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
-	      atWorkBtn.setPressed(app.isAtWork()); //FIXME The color doesn't stick. It only changes when you rotate the phone.
+	      //FIXME The color doesn't stick. Probably changed back by normal button behavior.
+	      atWorkBtn.setPressed(app.isAtWork());
+	      //[SANDER] Solution maybe is to just change the background. But I can't find the default pressed and not-pressed colors.
+	      atWorkBtn.setBackgroundColor(app.isAtWork() ? Color.BLUE : Color.LTGRAY);
 	      
-	      System.err.println("Atwork = " + app.isAtWork());
+	      //Change the log
+	      logsTextView.setText(app.getLastLogs());
+	      
+	      System.out.println("Atwork = " + app.isAtWork());
 	    }
 	};
 
