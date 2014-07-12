@@ -3,8 +3,8 @@
 
     <string name="app_name">WorkTimer</string>
     <string name="action_settings">Settings</string>
-    <string name="button_at_work">Button</string>
-    <string name="button_not_at_work">Button</string>
+    <string name="button_at_work">AT WORK</string>
+    <string name="button_not_at_work">NOT AT WORK</string>
 	<string name="logs">Last check-ins here</string>
 	<string name="last_check_ins">E-Mail last check-ins</string>
     
