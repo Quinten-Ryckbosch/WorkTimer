@@ -1,6 +1,8 @@
 package be.qrsdp.worktimer;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import android.app.Application;
 import android.content.ContentValues;
@@ -11,7 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class MainApplication extends Application {
-
+	
 	private ArrayList<WorkLog> workLogs;
 	private WorkLog currentLog;
 	private boolean atWork;
@@ -25,6 +27,7 @@ public class MainApplication extends Application {
 		
 		dataBaseHelper = new WorkDBHelper(getApplicationContext());
 		workLogs = dataBaseHelper.getAllRecords();
+		Collections.sort(workLogs);
 		
 		
 		atWork = isAtWork(workLogs);
@@ -47,11 +50,13 @@ public class MainApplication extends Application {
 			//Start new workBlock
 			currentLog = new WorkLog();
 			workLogs.add(currentLog);
+			Collections.sort(workLogs);
 		} else {
 			//End last workBlock
 			currentLog.endWorkBlock();
-			//Only store complete logs?
+			//Only store complete records?
 			dataBaseHelper.insertRecord(currentLog);
+			
 		}
 		atWork = !atWork;
 	}
@@ -62,7 +67,7 @@ public class MainApplication extends Application {
 
 	public String getLastLogs() {
 		String lastLogs = "";
-		for(int i=workLogs.size()-1; i>=Math.max(0,workLogs.size()-5); i--){
+		for(int i=0; i < Math.min(5,workLogs.size()); i++){
 			lastLogs += workLogs.get(i).getTimeString() + "\n";
 		}
 		return lastLogs;
@@ -107,6 +112,15 @@ class WorkDBHelper extends SQLiteOpenHelper {
 		
 		dataBase.close();
 		return rowId;
+	}
+	
+	public void updateRecord(WorkLog log){
+		SQLiteDatabase dataBase = this.getWritableDatabase();
+		String updateQuery = "UPDATE log SET StopTime='" + WorkLog.parseWorkLog(log.getStopTime())
+				+ "' WHERE StartTime='" + WorkLog.parseWorkLog(log.getStartTime()) + "'";
+		Log.d(DBHELPER_TAG, "Record updated: " + updateQuery);
+		//TODO use dataBase.update instead of raw sql command.
+		dataBase.execSQL(updateQuery);
 	}
 	
 	public ArrayList<WorkLog> getAllRecords(){

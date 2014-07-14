@@ -4,7 +4,7 @@ import java.util.Calendar;
 
 import android.util.Log;
 
-public class WorkLog {
+public class WorkLog implements Comparable<WorkLog> {
 	private final static String WORKLOG_TAG = "WorkLog";
 
 	// Holds time (and other things?) for 1 work block
@@ -95,6 +95,10 @@ public class WorkLog {
 			calTime.set(i, Integer.parseInt(fieldArray[i]));
 		}
 		return calTime;
+	}
+
+	public int compareTo(WorkLog arg0) {
+		return (arg0.getStartTime().compareTo(this.getStartTime()));
 	}
 	
 }
