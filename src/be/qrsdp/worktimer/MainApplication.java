@@ -1,7 +1,6 @@
 package be.qrsdp.worktimer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 import android.app.Application;
@@ -51,11 +50,11 @@ public class MainApplication extends Application {
 			currentLog = new WorkLog();
 			workLogs.add(currentLog);
 			Collections.sort(workLogs);
+			dataBaseHelper.insertRecord(currentLog);
 		} else {
 			//End last workBlock
 			currentLog.endWorkBlock();
-			//Only store complete records?
-			dataBaseHelper.insertRecord(currentLog);
+			dataBaseHelper.updateRecord(currentLog);
 			
 		}
 		atWork = !atWork;
