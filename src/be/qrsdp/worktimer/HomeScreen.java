@@ -2,6 +2,7 @@ package be.qrsdp.worktimer;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -19,6 +20,7 @@ public class HomeScreen extends Activity {
 	
 	TextView logsTextView;
 	
+	@SuppressWarnings("deprecation")
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,9 +31,9 @@ public class HomeScreen extends Activity {
         getGuiElementsFromLayout();
         
         //Button
-        atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
+        //atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
         //atWorkBtn.setPressed(app.isAtWork());
-        atWorkBtn.setBackgroundColor(app.isAtWork() ? Color.BLUE : Color.LTGRAY);
+        atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
         atWorkBtn.setOnClickListener(atWorkBtnListener);
         
         //Logs
@@ -49,11 +51,12 @@ public class HomeScreen extends Activity {
 	    public void onClick(View v) {
 	      app.toggle();
 	      //Change look of the button
-	      atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
+	      //atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
 	      //FIXME The color doesn't stick. Probably changed back by normal button behavior.
-	      atWorkBtn.setPressed(app.isAtWork());
+	      //atWorkBtn.setPressed(app.isAtWork());
 	      //[SANDER] Solution maybe is to just change the background. But I can't find the default pressed and not-pressed colors.
-	      atWorkBtn.setBackgroundColor(app.isAtWork() ? Color.BLUE : Color.LTGRAY);
+	      atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
+	      //atWorkBtn.setBackgroundColor(app.isAtWork() ? Color.BLUE : Color.LTGRAY);
 	      
 	      //Change the log
 	      logsTextView.setText(app.getLastLogs());
