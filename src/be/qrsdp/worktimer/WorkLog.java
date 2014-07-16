@@ -3,10 +3,12 @@ package be.qrsdp.worktimer;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import android.text.format.Time;
 import android.util.Log;
 
 public class WorkLog implements Comparable<WorkLog> {
 	private final static String WORKLOG_TAG = "WorkLog";
+	private final static String[] MONTH_NAMES_SHORT = {"Jan", "Feb", "Mrt", "Apr", "Mei", "Jun", "Jul", "Aug", "Sept", "Okt", "Nov", "Dec"};
 
 	// Holds time (and other things?) for 1 work block
 	private Calendar startTime, stopTime = null;
@@ -82,6 +84,33 @@ public class WorkLog implements Comparable<WorkLog> {
 			+ ":" + getTwoDigitNumber(time.get(Calendar.MINUTE));
 	}
 	
+	public static String getWeekString(Calendar[] days){
+		return days[0].get(Calendar.DAY_OF_MONTH)
+				+ " " + MONTH_NAMES_SHORT[days[0].get(Calendar.MONTH)]
+				+ " - " + days[1].get(Calendar.DAY_OF_MONTH)
+				+ " " + MONTH_NAMES_SHORT[days[1].get(Calendar.MONTH)];
+	}
+	
+	public static String getDayString(Calendar day) {
+		return day.get(Calendar.DAY_OF_MONTH)
+				+ " " + MONTH_NAMES_SHORT[day.get(Calendar.MONTH)];
+	}
+	
+	public String getLogString(){
+		String time = "";
+		time += getTwoDigitNumber(startTime.get(Calendar.HOUR_OF_DAY))
+				+ ":" + getTwoDigitNumber(startTime.get(Calendar.MINUTE));
+		
+		if(stopTime == null){
+			time += " - current";
+		} else {
+			time += " - " + getTwoDigitNumber(stopTime.get(Calendar.HOUR_OF_DAY))
+					+ ":" + getTwoDigitNumber(stopTime.get(Calendar.MINUTE));
+		}
+		
+		return time += " \t " + this.getDurationInMin() + " min.";
+	}
+	
 	public String getTimeString(){
 		String time = "";
 		time += getTime(startTime);
@@ -133,22 +162,28 @@ public class WorkLog implements Comparable<WorkLog> {
 		ArrayList<WorkLog> parialList = WorkLog.getLogsBetween(from, to, list);
 		System.err.println("parialList from " + getTime(from) + " to " + getTime(to) + " : " + parialList.size());
 		for(WorkLog log: parialList){
-			duration = log.getDurationInMin();
+			duration += log.getDurationInMin();
 		}
 		
 		return (int)Math.round(duration / 60.0);
 	}
 	
+	private static Calendar getFirstDayOfWeek(int weekNumber){
+		int year = 2014;
+		Calendar cal = Calendar.getInstance();
+		cal.set(year, 1, 1, 0, 0, 0);
+		cal.set(Calendar.WEEK_OF_YEAR, weekNumber);
+		int days = cal.getFirstDayOfWeek() - cal.get(Calendar.DAY_OF_WEEK);
+		//cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+		cal.add(Calendar.DAY_OF_WEEK, days);
+		return cal;
+	}
+	
 	public static Calendar[] getFirstAndLastDayOfWeek(int weekNumber, ArrayList<WorkLog> list){
 		Calendar[] ret = new Calendar[2];
-		Calendar from = Calendar.getInstance();
-		from.set(2014, 1, 1, 0, 0, 0);
-		from.set(Calendar.WEEK_OF_YEAR, weekNumber);
-		ret[0] = from;
-		Calendar to   = Calendar.getInstance();
-		to.set(2014, 1, 1, 0, 0, 0);
-		to.set(Calendar.WEEK_OF_YEAR, weekNumber + 1);
-		ret[1] = to;
+		ret[0] = getFirstDayOfWeek(weekNumber);
+		ret[1] = getFirstDayOfWeek(weekNumber + 1);
+		ret[1].add(Calendar.SECOND, -1);
 		return ret;
 	}
 	
@@ -161,11 +196,32 @@ public class WorkLog implements Comparable<WorkLog> {
 		int duration = 0;
 		ArrayList<WorkLog> parialList = WorkLog.getLogsOfWeek(weekNumber, list);
 		for(WorkLog log: parialList){
-			duration = log.getDurationInMin();
+			duration += log.getDurationInMin();
 		}
 		return (int)Math.round(duration / 60.0);
 	}
 
+	public static ArrayList<WorkLog> getLogsOfDay(Calendar day, ArrayList<WorkLog> list) {
+		Calendar from = (Calendar) day.clone();
+		from.set(Calendar.HOUR_OF_DAY, 0);
+		from.set(Calendar.MINUTE, 0);
+		from.set(Calendar.SECOND, 0);
+		Calendar to = (Calendar) day.clone();
+		to.set(Calendar.HOUR_OF_DAY, 23);
+		to.set(Calendar.MINUTE, 59);
+		to.set(Calendar.SECOND, 59);
+		return getLogsBetween(from, to, list);
+	}
+	
+	public static int getDurationOfDay(Calendar day, ArrayList<WorkLog> list) {
+		int duration = 0;
+		ArrayList<WorkLog> parialList = WorkLog.getLogsOfDay(day, list);
+		for(WorkLog log: parialList){
+			duration += log.getDurationInMin();
+		}
+		return (int)Math.round(duration / 60.0);
+	}
+	
 	public int compareTo(WorkLog arg0) {
 		return (arg0.getStartTime().compareTo(this.getStartTime()));
 	}

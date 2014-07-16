@@ -71,10 +71,9 @@ public class HomeScreen extends Activity {
 	
 	private void getGuiElementsFromLayout() {
 		atWorkBtn = (Button) findViewById(R.id.btn_work);
-		emailBtn = (Button) findViewById(R.id.btn_email);
-		
 		logsTextView = (TextView) findViewById(R.id.tv_log);
 	}
+	
 	
 	private class LoadDataBaseTask extends AsyncTask<Void, Void, String> {
 	    /** The system calls this to perform work in a worker thread and
