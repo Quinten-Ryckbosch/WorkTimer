@@ -13,30 +13,35 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class MainApplication extends Application {
-	
+
 	private ArrayList<WorkLog> workLogs;
 	private WorkLog currentLog;
 	private boolean atWork;
-	
+
 	private WorkDBHelper dataBaseHelper;
-	
+
 	@Override
 	public void onCreate() {
 
 		System.out.println("MainApplication is Created.");
-		
+
 		dataBaseHelper = new WorkDBHelper(getApplicationContext());
-		
+
 		super.onCreate();
 	}
-	
-	public void loadWorkLogs(){
+
+	public void loadCurrentWorkLog(){
+		this.currentLog = dataBaseHelper.getCurrentLog();
+		this.atWork = (this.currentLog != null);
+	}
+
+	public void loadAllWorkLogs(){
 		workLogs = dataBaseHelper.getAllRecords();
 		Collections.sort(workLogs);
-		
+
 		atWork = isAtWork(workLogs);
 	}
-	
+
 	private boolean isAtWork(ArrayList<WorkLog> workLogs){
 		for(WorkLog log: workLogs){
 			if(log.isCurrent()){
@@ -46,11 +51,11 @@ public class MainApplication extends Application {
 		}
 		return false;
 	}
-	
+
 	public boolean isAtWork(){
 		return atWork;
 	}
-	
+
 	void toggle(){
 		if(!atWork){
 			//Start new workBlock
@@ -62,20 +67,25 @@ public class MainApplication extends Application {
 			//End last workBlock
 			currentLog.endWorkBlock();
 			dataBaseHelper.updateRecord(currentLog);
-			
+
 		}
 		atWork = !atWork;
 	}
 
 	public String getLastLogs() {
-		String lastLogs = "Week " + Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) + ": " + WorkLog.getDurationOfWeek(Calendar.getInstance().get(Calendar.WEEK_OF_YEAR), workLogs) + "\n";
-		for(int i=0; i < Math.min(5,workLogs.size()); i++){
-			lastLogs += workLogs.get(i).getTimeString() + "\n";
+		//Get Today's weeknumber:
+		int weekNumber = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+		ArrayList<WorkLog> weekList = WorkLog.getLogsOfWeek(weekNumber, workLogs);
+		Calendar[] days = WorkLog.getFirstAndLastDayOfWeek(weekNumber, workLogs);
+		String lastLogs = "Week " + WorkLog.getTime(days[0]) + " - " + WorkLog.getTime(days[1]) + " : "
+				+ WorkLog.getDurationOfWeek(Calendar.getInstance().get(Calendar.WEEK_OF_YEAR), workLogs) + "\n";
+		for(WorkLog log: weekList){
+			lastLogs += log.getTimeString() + "\n";
 		}
 		return lastLogs;
 	}
-	
-    
+
+
 }
 
 class WorkDBHelper extends SQLiteOpenHelper {
@@ -83,39 +93,56 @@ class WorkDBHelper extends SQLiteOpenHelper {
 
 	private static final int DATABASE_VERSION = 2;
 	private static final String DATABASE_NAME = "WorkLog.db";
-    private static final String TABLE_CREATE = "CREATE TABLE Log ( StartTime TEXT, StopTime TEXT);";
+	private static final String TABLE_CREATE = "CREATE TABLE Log ( StartTime TEXT, StopTime TEXT);";
 
-    WorkDBHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
+	WorkDBHelper(Context context) {
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	}
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-    	db.execSQL(TABLE_CREATE);
-    	Log.d(DBHELPER_TAG, "DataBase " + DATABASE_NAME + " is created.");
-    }
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		db.execSQL(TABLE_CREATE);
+		Log.d(DBHELPER_TAG, "DataBase " + DATABASE_NAME + " is created.");
+	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public long insertRecord(WorkLog log){
 		SQLiteDatabase dataBase = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put("StartTime", WorkLog.parseWorkLog(log.getStartTime()));
 		values.put("StopTime", WorkLog.parseWorkLog(log.getStopTime()));
 		long rowId = dataBase.insert("log", null, values);
-		
+
 		Log.d(DBHELPER_TAG, "Record inserted:");
 		Log.d(DBHELPER_TAG, "\tStartTime: " + WorkLog.parseWorkLog(log.getStartTime()));
 		Log.d(DBHELPER_TAG, "\tStopTime:  " + WorkLog.parseWorkLog(log.getStopTime()));
-		
+
 		dataBase.close();
 		return rowId;
 	}
-	
+
+	public WorkLog getCurrentLog(){
+		SQLiteDatabase dataBase = this.getWritableDatabase();
+		String[] whereArgs = new String[] {
+				"null"
+		};
+		String queryString =
+				"SELECT * FROM log " +
+				"WHERE StopTime = ?";
+		Cursor data = dataBase.rawQuery(queryString, whereArgs);
+		Log.d(DBHELPER_TAG, "Record updated: " + queryString);
+
+		if(data.moveToFirst()){
+			return new WorkLog(data.getString(0), data.getString(1));
+		}
+		return null;
+	}
+
 	public void updateRecord(WorkLog log){
 		SQLiteDatabase dataBase = this.getWritableDatabase();
 		String updateQuery = "UPDATE log SET StopTime='" + WorkLog.parseWorkLog(log.getStopTime())
@@ -124,26 +151,26 @@ class WorkDBHelper extends SQLiteOpenHelper {
 		//TODO use dataBase.update instead of raw sql command.
 		dataBase.execSQL(updateQuery);
 	}
-	
+
 	public ArrayList<WorkLog> getAllRecords(){
 		ArrayList<WorkLog> workLogs = new ArrayList<WorkLog>();
 		String selectQuery = "SELECT  * FROM log";
-	    SQLiteDatabase database = this.getWritableDatabase();
-	    Cursor cursor = database.rawQuery(selectQuery, null);
-	    if (cursor.moveToFirst()) {
-	        do {
-	        	WorkLog current = new WorkLog(cursor.getString(0), cursor.getString(1));
-	        	
-	        	Log.d(DBHELPER_TAG, "Record loaded:");
-	        	Log.d(DBHELPER_TAG, "\t" + current.getTimeString());
-                
-	        	workLogs.add(current);
-	        } while (cursor.moveToNext());
-	    }
-	    
-	    Log.d(DBHELPER_TAG, "Number of records returned: " + workLogs.size());
+		SQLiteDatabase database = this.getWritableDatabase();
+		Cursor cursor = database.rawQuery(selectQuery, null);
+		if (cursor.moveToFirst()) {
+			do {
+				WorkLog current = new WorkLog(cursor.getString(0), cursor.getString(1));
 
-	    return workLogs;
+				Log.d(DBHELPER_TAG, "Record loaded:");
+				Log.d(DBHELPER_TAG, "\t" + current.getTimeString());
+
+				workLogs.add(current);
+			} while (cursor.moveToNext());
+		}
+
+		Log.d(DBHELPER_TAG, "Number of records returned: " + workLogs.size());
+
+		return workLogs;
 
 	}
 }

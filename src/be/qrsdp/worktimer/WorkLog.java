@@ -139,14 +139,31 @@ public class WorkLog implements Comparable<WorkLog> {
 		return (int)Math.round(duration / 60.0);
 	}
 	
-	public static int getDurationOfWeek(int weekNumber, ArrayList<WorkLog> list){
+	public static Calendar[] getFirstAndLastDayOfWeek(int weekNumber, ArrayList<WorkLog> list){
+		Calendar[] ret = new Calendar[2];
 		Calendar from = Calendar.getInstance();
-		from.set(2014, 0, 0, 0, 0, 0);
+		from.set(2014, 1, 1, 0, 0, 0);
 		from.set(Calendar.WEEK_OF_YEAR, weekNumber);
+		ret[0] = from;
 		Calendar to   = Calendar.getInstance();
-		to.set(2014, 0, 0, 0, 0, 0);
+		to.set(2014, 1, 1, 0, 0, 0);
 		to.set(Calendar.WEEK_OF_YEAR, weekNumber + 1);
-		return getDurationBetweenInHours(from, to, list);
+		ret[1] = to;
+		return ret;
+	}
+	
+	public static ArrayList<WorkLog> getLogsOfWeek(int weekNumber, ArrayList<WorkLog> list){
+		Calendar[] days = getFirstAndLastDayOfWeek(weekNumber, list);
+		return WorkLog.getLogsBetween(days[0], days[1], list);
+	}
+	
+	public static int getDurationOfWeek(int weekNumber, ArrayList<WorkLog> list){
+		int duration = 0;
+		ArrayList<WorkLog> parialList = WorkLog.getLogsOfWeek(weekNumber, list);
+		for(WorkLog log: parialList){
+			duration = log.getDurationInMin();
+		}
+		return (int)Math.round(duration / 60.0);
 	}
 
 	public int compareTo(WorkLog arg0) {

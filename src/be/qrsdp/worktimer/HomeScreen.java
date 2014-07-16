@@ -29,6 +29,11 @@ public class HomeScreen extends Activity {
         
         getGuiElementsFromLayout();
         
+        //Get "atwork" state correct as soon as possible
+        app.loadCurrentWorkLog();
+    	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
+        
+    	//Load database in extra thread.
         new LoadDataBaseTask().execute();
         
         /*app.loadWorkLogs();
@@ -54,12 +59,7 @@ public class HomeScreen extends Activity {
 	    public void onClick(View v) {
 	      app.toggle();
 	      //Change look of the button
-	      //atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
-	      //FIXME The color doesn't stick. Probably changed back by normal button behavior.
-	      //atWorkBtn.setPressed(app.isAtWork());
-	      //[SANDER] Solution maybe is to just change the background. But I can't find the default pressed and not-pressed colors.
 	      atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
-	      //atWorkBtn.setBackgroundColor(app.isAtWork() ? Color.BLUE : Color.LTGRAY);
 	      
 	      //Change the log
 	      logsTextView.setText(app.getLastLogs());
@@ -80,7 +80,7 @@ public class HomeScreen extends Activity {
 	    /** The system calls this to perform work in a worker thread and
 	      * delivers it the parameters given to AsyncTask.execute() */
 	    protected String doInBackground(Void... args) {
-	        app.loadWorkLogs();
+	    	app.loadAllWorkLogs();
 	    	return app.getLastLogs();
 	    }
 	    
@@ -97,10 +97,6 @@ public class HomeScreen extends Activity {
 	    protected void onPreExecute(){
 	    	logsTextView.setText("Loading logs..");
 	    }
-	    
-	    
-	    //onProgressUpdate
-	    //Check "Working" vs "Not Working" state early
 	}
 
 }
