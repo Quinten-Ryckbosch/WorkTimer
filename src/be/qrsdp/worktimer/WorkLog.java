@@ -1,5 +1,6 @@
 package be.qrsdp.worktimer;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import android.util.Log;
@@ -10,6 +11,8 @@ public class WorkLog implements Comparable<WorkLog> {
 	// Holds time (and other things?) for 1 work block
 	private Calendar startTime, stopTime = null;
 	private boolean current = false;
+	//Duration of this log in seconds;
+	private int duration = -1;
 	
 	WorkLog(){
 		startWorkBlock();
@@ -31,7 +34,23 @@ public class WorkLog implements Comparable<WorkLog> {
 	void endWorkBlock(){
 		stopTime = Calendar.getInstance();
 		current = false;
+		duration = (int)(this.stopTime.getTimeInMillis() - this.startTime.getTimeInMillis())/1000;
 		Log.d(WORKLOG_TAG, "Stoped Working: " + getTimeString());
+	}
+	
+	public int getDurationInSec(){
+		if(duration < 0){
+			if(this.stopTime == null){
+				return (int)(Math.round(Calendar.getInstance().getTimeInMillis() - this.startTime.getTimeInMillis())/1000.0);
+			} else {
+				duration = (int)(Math.round(this.stopTime.getTimeInMillis() - this.startTime.getTimeInMillis())/1000.0);
+			}
+		}
+		return duration;
+	}
+	
+	public int getDurationInMin(){
+		return (int)Math.round(getDurationInSec()/60.0);
 	}
 	
 	public boolean isCurrent(){
@@ -73,7 +92,7 @@ public class WorkLog implements Comparable<WorkLog> {
 			time += " - " + getTime(stopTime);
 		}
 		
-		return time;
+		return time += " - " + this.getDurationInMin();
 	}
 	
 	public static String parseWorkLog(Calendar time){
@@ -95,6 +114,39 @@ public class WorkLog implements Comparable<WorkLog> {
 			calTime.set(i, Integer.parseInt(fieldArray[i]));
 		}
 		return calTime;
+	}
+	
+	public static ArrayList<WorkLog> getLogsBetween(Calendar from, Calendar to, ArrayList<WorkLog> list){
+		ArrayList<WorkLog> partialList = new ArrayList<WorkLog>();
+		
+		for(WorkLog log: list){
+			if(log.getStartTime().after(from) && log.getStartTime().before(to)){
+				partialList.add(log);
+			}
+		}
+		
+		return partialList;
+	}
+	
+	public static int getDurationBetweenInHours(Calendar from, Calendar to, ArrayList<WorkLog> list){
+		int duration = 0;
+		ArrayList<WorkLog> parialList = WorkLog.getLogsBetween(from, to, list);
+		System.err.println("parialList from " + getTime(from) + " to " + getTime(to) + " : " + parialList.size());
+		for(WorkLog log: parialList){
+			duration = log.getDurationInMin();
+		}
+		
+		return (int)Math.round(duration / 60.0);
+	}
+	
+	public static int getDurationOfWeek(int weekNumber, ArrayList<WorkLog> list){
+		Calendar from = Calendar.getInstance();
+		from.set(2014, 0, 0, 0, 0, 0);
+		from.set(Calendar.WEEK_OF_YEAR, weekNumber);
+		Calendar to   = Calendar.getInstance();
+		to.set(2014, 0, 0, 0, 0, 0);
+		to.set(Calendar.WEEK_OF_YEAR, weekNumber + 1);
+		return getDurationBetweenInHours(from, to, list);
 	}
 
 	public int compareTo(WorkLog arg0) {

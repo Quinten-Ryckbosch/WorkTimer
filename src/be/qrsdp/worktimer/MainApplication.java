@@ -1,6 +1,7 @@
 package be.qrsdp.worktimer;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 
 import android.app.Application;
@@ -25,16 +26,18 @@ public class MainApplication extends Application {
 		System.out.println("MainApplication is Created.");
 		
 		dataBaseHelper = new WorkDBHelper(getApplicationContext());
-		workLogs = dataBaseHelper.getAllRecords();
-		Collections.sort(workLogs);
-		
-		
-		atWork = isAtWork(workLogs);
 		
 		super.onCreate();
 	}
 	
-	boolean isAtWork(ArrayList<WorkLog> workLogs){
+	public void loadWorkLogs(){
+		workLogs = dataBaseHelper.getAllRecords();
+		Collections.sort(workLogs);
+		
+		atWork = isAtWork(workLogs);
+	}
+	
+	private boolean isAtWork(ArrayList<WorkLog> workLogs){
 		for(WorkLog log: workLogs){
 			if(log.isCurrent()){
 				this.currentLog = log;
@@ -42,6 +45,10 @@ public class MainApplication extends Application {
 			}
 		}
 		return false;
+	}
+	
+	public boolean isAtWork(){
+		return atWork;
 	}
 	
 	void toggle(){
@@ -59,13 +66,9 @@ public class MainApplication extends Application {
 		}
 		atWork = !atWork;
 	}
-	
-	boolean isAtWork(){
-		return atWork;
-	}
 
 	public String getLastLogs() {
-		String lastLogs = "";
+		String lastLogs = "Week " + Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) + ": " + WorkLog.getDurationOfWeek(Calendar.getInstance().get(Calendar.WEEK_OF_YEAR), workLogs) + "\n";
 		for(int i=0; i < Math.min(5,workLogs.size()); i++){
 			lastLogs += workLogs.get(i).getTimeString() + "\n";
 		}
@@ -144,3 +147,4 @@ class WorkDBHelper extends SQLiteOpenHelper {
 
 	}
 }
+
