@@ -22,11 +22,13 @@
 
     <ScrollView
         android:id="@+id/sv_log"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/btn_work"
-        android:layout_marginTop="21dp" >
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dp" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,18 +39,11 @@
                 android:id="@+id/tv_log"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-     		    android:text="@string/logs" />
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
+                android:text="@string/logs" />
             
         </LinearLayout>
     </ScrollView>
-
-    <Button
-        android:id="@+id/btn_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:text="@string/last_check_ins" />
 
 </RelativeLayout>
