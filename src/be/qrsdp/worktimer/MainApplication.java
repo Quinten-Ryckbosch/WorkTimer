@@ -93,20 +93,28 @@ public class MainApplication extends Application {
 	private String getLogsOfWeek(int weekNumber){
 		Calendar[] days = WorkLog.getFirstAndLastDayOfWeek(weekNumber, workLogs);
 		String logsOfWeek = WorkLog.getWeekString(days) + " \t "
-				+ WorkLog.getDurationOfWeek(weekNumber, workLogs) + " hours \n";
+				+ getDurationString(WorkLog.getDurationOfWeek(weekNumber, workLogs)) + "\n";
 		//Per Day:
 		Calendar day = days[1];
 		for(int i=0; i<7; i++){
 			ArrayList<WorkLog> dayList = WorkLog.getLogsOfDay(day, workLogs);
 			if(dayList.size() > 0){
-				logsOfWeek += "\t" + WorkLog.getDayString(day) + "  \t" + WorkLog.getDurationOfDay(day, workLogs) + " hours \n";
+				logsOfWeek += "\t" + WorkLog.getDayString(day) + "  \t" + getDurationString(WorkLog.getDurationOfDay(day, workLogs)) + "\n";
 				for(WorkLog log: dayList){
-					logsOfWeek += "\t\t" + log.getLogString() + "\n";
+					logsOfWeek += "\t\t" + log.getLogString() + " - " + getDurationString(log.getDurationInMin()) + "\n";
 				}
 			}
 			day.add(Calendar.DAY_OF_WEEK, -1);
 		}
 		return logsOfWeek;
+	}
+
+	private String getDurationString(int duration) {
+		if(duration >= 60){
+			return Math.round(duration / 6.0)/10.0 + " hours";
+		} else {
+			return duration + " min";
+		}
 	}
 
 

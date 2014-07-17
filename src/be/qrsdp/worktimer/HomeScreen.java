@@ -1,9 +1,14 @@
 package be.qrsdp.worktimer;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +27,10 @@ public class HomeScreen extends Activity {
 	
 	TextView logsTextView;
 	
+	NotificationCompat.Builder mBuilder;
+	int notifyID = 1;
+	
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
 		System.out.println("HomeScreen Created");
@@ -36,8 +45,13 @@ public class HomeScreen extends Activity {
         app.loadCurrentWorkLog();
     	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
         
-    	//Load database in extra thread.
+    	//Create the notification
+    	loadNotification();
+        
+        //Load database in extra thread.
         new LoadDataBaseTask().execute();
+        
+        
     }
 
 	@Override
@@ -71,7 +85,30 @@ public class HomeScreen extends Activity {
 		} catch (android.content.ActivityNotFoundException ex) {
 		    Toast.makeText(HomeScreen.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
 		}
-		
+	}
+	
+	private void loadNotification(){
+		//Creating a notification
+        mBuilder = new NotificationCompat.Builder(this);
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, HomeScreen.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(HomeScreen.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);
+        
+        updateNotification();
+	}
+	
+	private void updateNotification(){
+		mBuilder.setSmallIcon(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
+        mBuilder.setContentTitle("WorkLogger");
+        mBuilder.setContentText(app.isAtWork() ? "Working" : "Not working");
+        mBuilder.setOngoing(true);
+        
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+	    mNotificationManager.notify(notifyID, mBuilder.build());
 	}
 
 	private OnClickListener atWorkBtnListener = new OnClickListener() {
@@ -82,6 +119,9 @@ public class HomeScreen extends Activity {
 	      
 	      //Change the log
 	      logsTextView.setText(app.getLastLogs());
+	      
+	      //Change notification
+	      updateNotification();
 	      
 	      System.out.println("Atwork = " + app.isAtWork());
 	    }

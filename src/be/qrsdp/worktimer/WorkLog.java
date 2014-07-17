@@ -108,7 +108,7 @@ public class WorkLog implements Comparable<WorkLog> {
 					+ ":" + getTwoDigitNumber(stopTime.get(Calendar.MINUTE));
 		}
 		
-		return time += " \t " + this.getDurationInMin() + " min.";
+		return time;
 	}
 	
 	public String getTimeString(){
@@ -157,7 +157,7 @@ public class WorkLog implements Comparable<WorkLog> {
 		return partialList;
 	}
 	
-	public static int getDurationBetweenInHours(Calendar from, Calendar to, ArrayList<WorkLog> list){
+	public static int getDurationBetween(Calendar from, Calendar to, ArrayList<WorkLog> list){
 		int duration = 0;
 		ArrayList<WorkLog> parialList = WorkLog.getLogsBetween(from, to, list);
 		System.err.println("parialList from " + getTime(from) + " to " + getTime(to) + " : " + parialList.size());
@@ -165,7 +165,7 @@ public class WorkLog implements Comparable<WorkLog> {
 			duration += log.getDurationInMin();
 		}
 		
-		return (int)Math.round(duration / 60.0);
+		return duration;
 	}
 	
 	private static Calendar getFirstDayOfWeek(int weekNumber){
@@ -198,7 +198,7 @@ public class WorkLog implements Comparable<WorkLog> {
 		for(WorkLog log: parialList){
 			duration += log.getDurationInMin();
 		}
-		return (int)Math.round(duration / 60.0);
+		return duration;
 	}
 
 	public static ArrayList<WorkLog> getLogsOfDay(Calendar day, ArrayList<WorkLog> list) {
@@ -219,7 +219,7 @@ public class WorkLog implements Comparable<WorkLog> {
 		for(WorkLog log: parialList){
 			duration += log.getDurationInMin();
 		}
-		return (int)Math.round(duration / 60.0);
+		return duration;
 	}
 	
 	public int compareTo(WorkLog arg0) {
