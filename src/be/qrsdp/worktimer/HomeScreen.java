@@ -1,13 +1,16 @@
 package be.qrsdp.worktimer;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class HomeScreen extends Activity {
@@ -35,17 +38,6 @@ public class HomeScreen extends Activity {
         
     	//Load database in extra thread.
         new LoadDataBaseTask().execute();
-        
-        /*app.loadWorkLogs();
-        
-        //Button
-        //atWorkBtn.setText(app.isAtWork() ? R.string.button_at_work : R.string.button_not_at_work);
-        //atWorkBtn.setPressed(app.isAtWork());
-        atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
-        atWorkBtn.setOnClickListener(atWorkBtnListener);
-        
-        //Logs
-        logsTextView.setText(app.getLastLogs());*/
     }
 
 	@Override
@@ -55,6 +47,33 @@ public class HomeScreen extends Activity {
         return true;
     }
 	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	    case R.id.action_email:
+	        sendEmail();
+	        return true;
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	private void sendEmail() {
+		System.out.println("Send the email.");
+		Intent i = new Intent(Intent.ACTION_SEND);
+		i.setType("message/rfc822");
+		i.putExtra(Intent.EXTRA_EMAIL  , new String[]{""});
+		i.putExtra(Intent.EXTRA_SUBJECT, "Work log");
+		i.putExtra(Intent.EXTRA_TEXT   , app.getLastLogs());
+		try {
+		    startActivity(Intent.createChooser(i, "Send mail..."));
+		} catch (android.content.ActivityNotFoundException ex) {
+		    Toast.makeText(HomeScreen.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+		}
+		
+	}
+
 	private OnClickListener atWorkBtnListener = new OnClickListener() {
 	    public void onClick(View v) {
 	      app.toggle();
