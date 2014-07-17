@@ -14,9 +14,10 @@ import android.util.Log;
 
 public class MainApplication extends Application {
 
-	private ArrayList<WorkLog> workLogs;
-	private WorkLog currentLog;
+	private ArrayList<WorkLog> workLogs = null;
+	private WorkLog currentLog = null;
 	private boolean atWork;
+	private boolean dataBaseLoaded = false;
 
 	private WorkDBHelper dataBaseHelper;
 
@@ -24,7 +25,8 @@ public class MainApplication extends Application {
 	public void onCreate() {
 
 		System.out.println("MainApplication is Created.");
-
+		
+		dataBaseLoaded = false;
 		dataBaseHelper = new WorkDBHelper(getApplicationContext());
 		//dataBaseHelper.spoofDataBase();
 
@@ -32,15 +34,20 @@ public class MainApplication extends Application {
 	}
 
 	public void loadCurrentWorkLog(){
-		this.currentLog = dataBaseHelper.getCurrentLog();
-		this.atWork = (this.currentLog != null);
+		if(!dataBaseLoaded){
+			this.currentLog = dataBaseHelper.getCurrentLog();
+			this.atWork = (this.currentLog != null);
+		}
 	}
 
 	public void loadAllWorkLogs(){
-		workLogs = dataBaseHelper.getAllRecords();
-		Collections.sort(workLogs);
-
-		atWork = isAtWork(workLogs);
+		if(!dataBaseLoaded){
+			workLogs = dataBaseHelper.getAllRecords();
+			Collections.sort(workLogs);
+	
+			atWork = isAtWork(workLogs);
+			dataBaseLoaded = true;
+		}
 	}
 
 	private boolean isAtWork(ArrayList<WorkLog> workLogs){
