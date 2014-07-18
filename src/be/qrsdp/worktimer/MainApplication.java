@@ -90,7 +90,11 @@ public class MainApplication extends Application {
 		return lastLogs;
 	}
 	
-	private String getLogsOfWeek(int weekNumber){
+	public int getTodaysWeekNumber(){
+		return Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+	}
+	
+	public String getLogsOfWeek(int weekNumber){
 		Calendar[] days = WorkLog.getFirstAndLastDayOfWeek(weekNumber, workLogs);
 		String logsOfWeek = WorkLog.getWeekString(days) + " \t "
 				+ getDurationString(WorkLog.getDurationOfWeek(weekNumber, workLogs)) + "\n";

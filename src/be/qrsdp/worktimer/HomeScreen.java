@@ -23,12 +23,14 @@ public class HomeScreen extends Activity {
 	private MainApplication app;
 
 	Button atWorkBtn;
-	Button emailBtn;
+	Button leftBtn, rightBtn;
 	
 	TextView logsTextView;
 	
 	NotificationCompat.Builder mBuilder;
 	int notifyID = 1;
+	
+	private int showWeekNumber;
 	
 	
 	@Override
@@ -44,6 +46,9 @@ public class HomeScreen extends Activity {
         //Get "atwork" state correct as soon as possible
         app.loadCurrentWorkLog();
     	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
+    	
+    	//Weeknumber
+    	showWeekNumber = app.getTodaysWeekNumber();
         
     	//Create the notification
     	loadNotification();
@@ -53,7 +58,7 @@ public class HomeScreen extends Activity {
         
         
     }
-
+	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -118,7 +123,7 @@ public class HomeScreen extends Activity {
 	      atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
 	      
 	      //Change the log
-	      logsTextView.setText(app.getLastLogs());
+	      logsTextView.setText(app.getLogsOfWeek(showWeekNumber));
 	      
 	      //Change notification
 	      updateNotification();
@@ -126,10 +131,33 @@ public class HomeScreen extends Activity {
 	      System.out.println("Atwork = " + app.isAtWork());
 	    }
 	};
+	
+	private OnClickListener leftBtnListener = new OnClickListener() {
+		
+		public void onClick(View arg0) {
+			showWeekNumber --;
+			
+			//Change the log
+		    logsTextView.setText(app.getLogsOfWeek(showWeekNumber));
+			
+		}
+	};
+	
+	private OnClickListener rightBtnListener = new OnClickListener() {
+		
+		public void onClick(View arg0) {
+			showWeekNumber++;
+			
+			//Change the log
+		    logsTextView.setText(app.getLogsOfWeek(showWeekNumber));
+		}
+	};
 
 	
 	private void getGuiElementsFromLayout() {
 		atWorkBtn = (Button) findViewById(R.id.btn_work);
+		leftBtn = (Button) findViewById(R.id.buttonLeft);
+		rightBtn = (Button) findViewById(R.id.buttonRight);
 		logsTextView = (TextView) findViewById(R.id.tv_log);
 	}
 	
@@ -139,7 +167,7 @@ public class HomeScreen extends Activity {
 	      * delivers it the parameters given to AsyncTask.execute() */
 	    protected String doInBackground(Void... args) {
 	    	app.loadAllWorkLogs();
-	    	return app.getLastLogs();
+	    	return app.getLogsOfWeek(showWeekNumber);
 	    }
 	    
 	    /** The system calls this to perform work in the UI thread and delivers
@@ -147,6 +175,8 @@ public class HomeScreen extends Activity {
 	    protected void onPostExecute(String result) {
 	    	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
 	        atWorkBtn.setOnClickListener(atWorkBtnListener);
+	        leftBtn.setOnClickListener(leftBtnListener);
+	    	rightBtn.setOnClickListener(rightBtnListener);
 	        
 	        //Logs
 	        logsTextView.setText(result);
