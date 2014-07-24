@@ -3,7 +3,10 @@ package be.qrsdp.worktimer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import be.qrsdp.utils.Util;
 import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,7 +17,9 @@ import android.util.Log;
 
 public class MainApplication extends Application {
 
-	private ArrayList<WorkLog> workLogs = null;
+	//private ArrayList<WorkLog> workLogs = null;
+	//private Map<Integer, WorkDay> workDays = null;
+	private Map<Integer, WorkWeek> workWeeks = null;
 	private WorkLog currentLog = null;
 	private boolean atWork;
 	private boolean dataBaseLoaded = false;
@@ -40,14 +45,50 @@ public class MainApplication extends Application {
 		}
 	}
 
+	public WorkWeek getWorkWeek(Calendar cal){
+		return getWorkWeek(cal.get(Calendar.WEEK_OF_YEAR), cal.get(Calendar.YEAR));
+	}
+	
+	public WorkWeek getWorkWeek(int weekNumber, int year){
+		if(workWeeks.get(Util.getWeekIndex(weekNumber, year)) == null){
+			workWeeks.put(Util.getWeekIndex(weekNumber, year), new WorkWeek(weekNumber, year));
+		}
+		return workWeeks.get(Util.getWeekIndex(weekNumber, year));
+	}
+	
+	public WorkDay getWorkDayLog(Calendar cal){
+		return getWorkWeek(cal).getDay(cal);
+	}
+	
 	public void loadAllWorkLogs(){
 		if(!dataBaseLoaded){
-			workLogs = dataBaseHelper.getAllRecords();
+			ArrayList<WorkLog> workLogs = dataBaseHelper.getAllRecords();
 			Collections.sort(workLogs);
 	
 			atWork = isAtWork(workLogs);
 			dataBaseLoaded = true;
+			
+			workWeeks = new HashMap<Integer, WorkWeek>();
+			for(WorkLog log: workLogs){
+				if(getWorkDayLog(log.getStartTime()) == null){
+					System.err.println("Heel raar");
+				}
+				getWorkDayLog(log.getStartTime()).addWorkLog(log);
+			}
 		}
+	}
+	
+	public WorkLog startNewWorkLog(){
+		currentLog = new WorkLog();
+		WorkDay day = getWorkDayLog(currentLog.getStartTime());
+		day.addWorkLog(currentLog);
+		return currentLog;
+	}
+	
+	public WorkLog endCurrWorkLog(){
+		WorkDay day = getWorkDayLog(currentLog.getStartTime());
+		day.endWorkLog(currentLog);
+		return currentLog;
 	}
 
 	private boolean isAtWork(ArrayList<WorkLog> workLogs){
@@ -66,49 +107,48 @@ public class MainApplication extends Application {
 
 	void toggle(){
 		if(!atWork){
-			//Start new workBlock
-			currentLog = new WorkLog();
-			workLogs.add(currentLog);
-			Collections.sort(workLogs);
-			dataBaseHelper.insertRecord(currentLog);
+			//Start new workBlock and insert in dataBase
+			dataBaseHelper.insertRecord(startNewWorkLog());
 		} else {
-			//End last workBlock
-			currentLog.endWorkBlock();
-			dataBaseHelper.updateRecord(currentLog);
-
+			//End last workBlock and update log in dataBase
+			dataBaseHelper.updateRecord(endCurrWorkLog());
 		}
 		atWork = !atWork;
 	}
 	
 
-	public String getLastLogs() {
-		//Per Week:
-		int weekNumber = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
-		//ArrayList<WorkLog> weekList = WorkLog.getLogsOfWeek(weekNumber, workLogs);
-		String lastLogs = getLogsOfWeek(weekNumber);
-		lastLogs += getLogsOfWeek(weekNumber-1);
-		return lastLogs;
+	public String getLogsList(){
+		return "TODO";
 	}
 	
 	public int getTodaysWeekNumber(){
 		return Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
 	}
 	
-	public String getLogsOfWeek(int weekNumber){
-		Calendar[] days = WorkLog.getFirstAndLastDayOfWeek(weekNumber, workLogs);
-		String logsOfWeek = WorkLog.getWeekString(days) + " \t "
-				+ getDurationString(WorkLog.getDurationOfWeek(weekNumber, workLogs)) + "\n";
+	public int getTodaysYear() {
+		return Calendar.getInstance().get(Calendar.YEAR);
+	}
+	
+	public String getWeek(int weekNumber, int year){
+		return workWeeks.get(Util.getWeekIndex(weekNumber, year)).getString();
+	}
+	
+	public String getLogsOfWeek(int weekNumber, int year){
+		System.err.println("Workweek map size: " + workWeeks.size());
+		WorkWeek week = getWorkWeek(weekNumber, year);
+		System.err.println("index: " + Util.getWeekIndex(weekNumber, year));
+		String logsOfWeek = "";
 		//Per Day:
-		Calendar day = days[1];
-		for(int i=0; i<7; i++){
-			ArrayList<WorkLog> dayList = WorkLog.getLogsOfDay(day, workLogs);
-			if(dayList.size() > 0){
-				logsOfWeek += "\t" + WorkLog.getDayString(day) + "  \t" + getDurationString(WorkLog.getDurationOfDay(day, workLogs)) + "\n";
-				for(WorkLog log: dayList){
-					logsOfWeek += "\t\t" + log.getLogString() + " - " + getDurationString(log.getDurationInMin()) + "\n";
+		for(WorkDay workDay: week.getDays()){
+			if(workDay.getLogs().size() > 0){
+				logsOfWeek += "\t" + workDay.getString() + "  \t" + getDurationString(workDay.getDuration()) + "\n";
+				for(WorkLog log: workDay.getLogs()){
+					logsOfWeek += "\t\t" + log.getString() + " - " + getDurationString(log.getDuration()) + "\n";
 				}
 			}
-			day.add(Calendar.DAY_OF_WEEK, -1);
+		}
+		if(logsOfWeek.length() == 0){
+			logsOfWeek += "No logs to show this week";
 		}
 		return logsOfWeek;
 	}
@@ -212,8 +252,7 @@ class WorkDBHelper extends SQLiteOpenHelper {
 			do {
 				WorkLog current = new WorkLog(cursor.getString(0), cursor.getString(1));
 
-				Log.d(DBHELPER_TAG, "Record loaded:");
-				Log.d(DBHELPER_TAG, "\t" + current.getTimeString());
+				Log.d(DBHELPER_TAG, "Record loaded:\t" + current.getString());
 
 				workLogs.add(current);
 			} while (cursor.moveToNext());

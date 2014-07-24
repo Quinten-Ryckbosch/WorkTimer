@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,12 +26,12 @@ public class HomeScreen extends Activity {
 	Button atWorkBtn;
 	Button leftBtn, rightBtn;
 	
-	TextView logsTextView;
+	TextView logsTextView, textWeek;
 	
 	NotificationCompat.Builder mBuilder;
 	int notifyID = 1;
 	
-	private int showWeekNumber;
+	private int showWeekNumber, showYear;
 	
 	
 	@Override
@@ -49,6 +50,7 @@ public class HomeScreen extends Activity {
     	
     	//Weeknumber
     	showWeekNumber = app.getTodaysWeekNumber();
+    	showYear = app.getTodaysYear();
         
     	//Create the notification
     	loadNotification();
@@ -56,8 +58,15 @@ public class HomeScreen extends Activity {
         //Load database in extra thread.
         new LoadDataBaseTask().execute();
         
-        
     }
+	
+	private void getGuiElementsFromLayout() {
+		atWorkBtn = (Button) findViewById(R.id.btn_work);
+		leftBtn = (Button) findViewById(R.id.buttonLeft);
+		rightBtn = (Button) findViewById(R.id.buttonRight);
+		logsTextView = (TextView) findViewById(R.id.tv_log);
+		textWeek = (TextView) findViewById(R.id.textWeek);
+	}
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -84,7 +93,7 @@ public class HomeScreen extends Activity {
 		i.setType("message/rfc822");
 		i.putExtra(Intent.EXTRA_EMAIL  , new String[]{""});
 		i.putExtra(Intent.EXTRA_SUBJECT, "Work log");
-		i.putExtra(Intent.EXTRA_TEXT   , app.getLastLogs());
+		i.putExtra(Intent.EXTRA_TEXT   , app.getLogsList());
 		try {
 		    startActivity(Intent.createChooser(i, "Send mail..."));
 		} catch (android.content.ActivityNotFoundException ex) {
@@ -116,6 +125,12 @@ public class HomeScreen extends Activity {
 	    mNotificationManager.notify(notifyID, mBuilder.build());
 	}
 
+	private void refreshData(){
+		Log.d("HOMESCREEN", "show data for weeknumber: " + showWeekNumber);
+		logsTextView.setText(app.getLogsOfWeek(showWeekNumber, showYear));
+		textWeek.setText(app.getWeek(showWeekNumber, showYear));
+	}
+	
 	private OnClickListener atWorkBtnListener = new OnClickListener() {
 	    public void onClick(View v) {
 	      app.toggle();
@@ -123,7 +138,7 @@ public class HomeScreen extends Activity {
 	      atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
 	      
 	      //Change the log
-	      logsTextView.setText(app.getLogsOfWeek(showWeekNumber));
+	      refreshData();
 	      
 	      //Change notification
 	      updateNotification();
@@ -138,8 +153,7 @@ public class HomeScreen extends Activity {
 			showWeekNumber --;
 			
 			//Change the log
-		    logsTextView.setText(app.getLogsOfWeek(showWeekNumber));
-			
+		   refreshData();   
 		}
 	};
 	
@@ -149,25 +163,16 @@ public class HomeScreen extends Activity {
 			showWeekNumber++;
 			
 			//Change the log
-		    logsTextView.setText(app.getLogsOfWeek(showWeekNumber));
+		    refreshData();
 		}
 	};
-
-	
-	private void getGuiElementsFromLayout() {
-		atWorkBtn = (Button) findViewById(R.id.btn_work);
-		leftBtn = (Button) findViewById(R.id.buttonLeft);
-		rightBtn = (Button) findViewById(R.id.buttonRight);
-		logsTextView = (TextView) findViewById(R.id.tv_log);
-	}
-	
 	
 	private class LoadDataBaseTask extends AsyncTask<Void, Void, String> {
 	    /** The system calls this to perform work in a worker thread and
 	      * delivers it the parameters given to AsyncTask.execute() */
 	    protected String doInBackground(Void... args) {
 	    	app.loadAllWorkLogs();
-	    	return app.getLogsOfWeek(showWeekNumber);
+	    	return app.getLogsOfWeek(showWeekNumber, showYear);
 	    }
 	    
 	    /** The system calls this to perform work in the UI thread and delivers
@@ -179,11 +184,12 @@ public class HomeScreen extends Activity {
 	    	rightBtn.setOnClickListener(rightBtnListener);
 	        
 	        //Logs
-	        logsTextView.setText(result);
+	        refreshData();
 	    }
 	    
 	    protected void onPreExecute(){
 	    	logsTextView.setText("Loading logs..");
+	    	textWeek.setText("Week " + showWeekNumber);
 	    }
 	}
 
