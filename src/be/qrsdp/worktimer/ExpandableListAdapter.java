@@ -1,5 +1,7 @@
 package be.qrsdp.worktimer;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,10 +20,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     // child data in format of header title, child title
     private HashMap<String, List<String>> _listDataChild;
  
-    public ExpandableListAdapter(Context context, List<String> listDataHeader,
-            HashMap<String, List<String>> listChildData) {
+    public ExpandableListAdapter(Context context, HashMap<String, List<String>> listChildData) {
         this._context = context;
-        this._listDataHeader = listDataHeader;
+        this._listDataHeader = new ArrayList<String>(listChildData.keySet());
+        Collections.sort(_listDataHeader);
+        Collections.reverse(_listDataHeader);
         this._listDataChild = listChildData;
     }
  

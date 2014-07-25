@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import be.qrsdp.utils.Util;
@@ -133,22 +134,21 @@ public class MainApplication extends Application {
 		return workWeeks.get(Util.getWeekIndex(weekNumber, year)).getString();
 	}
 	
-	public String getLogsOfWeek(int weekNumber, int year){
+	public HashMap<String, List<String>> getLogsOfWeek(int weekNumber, int year){
+		HashMap<String, List<String>> logsOfWeek = new HashMap<String, List<String>>();
 		System.err.println("Workweek map size: " + workWeeks.size());
 		WorkWeek week = getWorkWeek(weekNumber, year);
 		System.err.println("index: " + Util.getWeekIndex(weekNumber, year));
-		String logsOfWeek = "";
 		//Per Day:
 		for(WorkDay workDay: week.getDays()){
 			if(workDay.getLogs().size() > 0){
-				logsOfWeek += "\t" + workDay.getString() + "  \t" + getDurationString(workDay.getDuration()) + "\n";
+				List<String> dayList = new ArrayList<String>();
 				for(WorkLog log: workDay.getLogs()){
-					logsOfWeek += "\t\t" + log.getString() + " - " + getDurationString(log.getDuration()) + "\n";
+					dayList.add(log.getString() + " - " + getDurationString(log.getDuration()));
 				}
+				logsOfWeek.put(workDay.getString() + "  \t" + getDurationString(workDay.getDuration()), dayList);
+				
 			}
-		}
-		if(logsOfWeek.length() == 0){
-			logsOfWeek += "No logs to show this week";
 		}
 		return logsOfWeek;
 	}

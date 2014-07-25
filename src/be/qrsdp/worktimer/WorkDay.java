@@ -2,6 +2,7 @@ package be.qrsdp.worktimer;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 
 import be.qrsdp.utils.Util;
 
@@ -64,6 +65,7 @@ public class WorkDay extends WorkLog{
 	}
 	
 	public ArrayList<WorkLog> getLogs(){
+		Collections.sort(todaysLogs);
 		return todaysLogs;
 	}
 	

@@ -82,7 +82,6 @@ public class HomeScreen extends Activity {
 		atWorkBtn = (Button) findViewById(R.id.btn_work);
 		leftBtn = (Button) findViewById(R.id.buttonLeft);
 		rightBtn = (Button) findViewById(R.id.buttonRight);
-		//logsTextView = (TextView) findViewById(R.id.tv_log);
 		textWeek = (TextView) findViewById(R.id.textWeek);
 		expListView = (ExpandableListView) findViewById(R.id.lvExp);
 	}
@@ -144,9 +143,16 @@ public class HomeScreen extends Activity {
 	    mNotificationManager.notify(notifyID, mBuilder.build());
 	}
 
-	private void refreshData(){
+	private void refreshData(HashMap<String, List<String>> result){
 		Log.d("HOMESCREEN", "show data for weeknumber: " + showWeekNumber);
-		listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
+		if(result == null){
+			result = app.getLogsOfWeek(showWeekNumber, showYear);
+		}
+		if(result.size() == 0){
+			Toast.makeText(this, "No logs to show for this week", Toast.LENGTH_LONG).show();
+		}// else {
+			listAdapter = new ExpandableListAdapter(this, result);
+		//}
         expListView.setAdapter(listAdapter);
 		textWeek.setText(app.getWeek(showWeekNumber, showYear));
 	}
@@ -158,7 +164,7 @@ public class HomeScreen extends Activity {
 	      atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
 	      
 	      //Change the log
-	      refreshData();
+	      refreshData(null);
 	      
 	      //Change notification
 	      updateNotification();
@@ -173,7 +179,7 @@ public class HomeScreen extends Activity {
 			showWeekNumber --;
 			
 			//Change the log
-		   refreshData();   
+		   refreshData(null);   
 		}
 	};
 	
@@ -183,7 +189,7 @@ public class HomeScreen extends Activity {
 			showWeekNumber++;
 			
 			//Change the log
-		    refreshData();
+		    refreshData(null);
 		}
 	};
 	
@@ -226,24 +232,24 @@ public class HomeScreen extends Activity {
         listDataChild.put(listDataHeader.get(2), comingSoon);
     }
 	
-	private class LoadDataBaseTask extends AsyncTask<Void, Void, String> {
+	private class LoadDataBaseTask extends AsyncTask<Void, Void, HashMap<String, List<String>>> {
 	    /** The system calls this to perform work in a worker thread and
 	      * delivers it the parameters given to AsyncTask.execute() */
-	    protected String doInBackground(Void... args) {
+	    protected HashMap<String, List<String>> doInBackground(Void... args) {
 	    	app.loadAllWorkLogs();
 	    	return app.getLogsOfWeek(showWeekNumber, showYear);
 	    }
 	    
 	    /** The system calls this to perform work in the UI thread and delivers
 	      * the result from doInBackground() */
-	    protected void onPostExecute(String result) {
+	    protected void onPostExecute(HashMap<String, List<String>> result) {
 	    	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
 	        atWorkBtn.setOnClickListener(atWorkBtnListener);
 	        leftBtn.setOnClickListener(leftBtnListener);
 	    	rightBtn.setOnClickListener(rightBtnListener);
 	        
 	        //Logs
-	        refreshData();
+	        refreshData(result);
 	    }
 	    
 	    protected void onPreExecute(){
