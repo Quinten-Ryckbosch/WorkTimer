@@ -8,6 +8,9 @@
         android:minSdkVersion="9"
         android:targetSdkVersion="17" 
         tools:ignore="OldTargetApi"/>
+    
+	<uses-permission
+	    android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:name="be.qrsdp.worktimer.MainApplication"

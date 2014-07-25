@@ -2,6 +2,11 @@ package be.qrsdp.utils;
 
 import java.util.Calendar;
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.util.Log;
+
 public class Util {
 	public final static String[] MONTH_NAMES_SHORT = {"Jan", "Feb", "Mrt", "Apr", "Mei", "Jun", "Jul", "Aug", "Sept", "Okt", "Nov", "Dec"};
 
@@ -52,5 +57,12 @@ public class Util {
 				+ " " + MONTH_NAMES_SHORT[days[0].get(Calendar.MONTH)]
 				+ " - " + days[1].get(Calendar.DAY_OF_MONTH)
 				+ " " + MONTH_NAMES_SHORT[days[1].get(Calendar.MONTH)];
+	}
+	
+	public static String getSSID(Context context){
+		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+		Log.d("SSID",wifiInfo.getSSID());
+		return wifiInfo.getSSID();
 	}
 }

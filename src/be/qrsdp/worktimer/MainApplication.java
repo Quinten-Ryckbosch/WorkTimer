@@ -17,6 +17,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class MainApplication extends Application {
+	private final static String LOG_TAG = "MainApplication";
 
 	//private ArrayList<WorkLog> workLogs = null;
 	//private Map<Integer, WorkDay> workDays = null;
@@ -32,7 +33,7 @@ public class MainApplication extends Application {
 	@Override
 	public void onCreate() {
 
-		System.out.println("MainApplication is Created.");
+		Log.d(LOG_TAG, "is Created.");
 		
 		dataBaseLoaded = false;
 		dataBaseHelper = new WorkDBHelper(getApplicationContext());
@@ -41,6 +42,8 @@ public class MainApplication extends Application {
 		//Weeknumber
     	showWeekNumber = getTodaysWeekNumber();
     	showYear = getTodaysYear();
+    	
+    	Util.getSSID(this);
 		
 		super.onCreate();
 	}
