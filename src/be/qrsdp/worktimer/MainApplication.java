@@ -24,6 +24,8 @@ public class MainApplication extends Application {
 	private WorkLog currentLog = null;
 	private boolean atWork;
 	private boolean dataBaseLoaded = false;
+	
+	public int showWeekNumber, showYear;
 
 	private WorkDBHelper dataBaseHelper;
 
@@ -36,6 +38,10 @@ public class MainApplication extends Application {
 		dataBaseHelper = new WorkDBHelper(getApplicationContext());
 		//dataBaseHelper.spoofDataBase();
 
+		//Weeknumber
+    	showWeekNumber = getTodaysWeekNumber();
+    	showYear = getTodaysYear();
+		
 		super.onCreate();
 	}
 
@@ -158,6 +164,18 @@ public class MainApplication extends Application {
 			return Math.round(duration / 6.0)/10.0 + " hours";
 		} else {
 			return duration + " min";
+		}
+	}
+
+	public void changeWeek(int i) {
+		showWeekNumber += i;
+		if(showWeekNumber > 52){
+			showWeekNumber -= 52;
+			showYear ++;
+		}
+		if(showWeekNumber < 1){
+			showWeekNumber += 52;
+			showYear --;
 		}
 	}
 

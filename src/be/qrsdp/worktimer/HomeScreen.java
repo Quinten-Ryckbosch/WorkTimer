@@ -37,8 +37,6 @@ public class HomeScreen extends Activity {
 	NotificationCompat.Builder mBuilder;
 	int notifyID = 1;
 	
-	private int showWeekNumber, showYear;
-	
 	ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
     List<String> listDataHeader;
@@ -58,10 +56,6 @@ public class HomeScreen extends Activity {
         //Get "atwork" state correct as soon as possible
         app.loadCurrentWorkLog();
     	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
-    	
-    	//Weeknumber
-    	showWeekNumber = app.getTodaysWeekNumber();
-    	showYear = app.getTodaysYear();
         
     	//Create the notification
     	loadNotification();
@@ -144,9 +138,9 @@ public class HomeScreen extends Activity {
 	}
 
 	private void refreshData(HashMap<String, List<String>> result){
-		Log.d("HOMESCREEN", "show data for weeknumber: " + showWeekNumber);
+		Log.d("HOMESCREEN", "show data for weeknumber: " + app.showWeekNumber);
 		if(result == null){
-			result = app.getLogsOfWeek(showWeekNumber, showYear);
+			result = app.getLogsOfWeek(app.showWeekNumber, app.showYear);
 		}
 		if(result.size() == 0){
 			Toast.makeText(this, "No logs to show for this week", Toast.LENGTH_LONG).show();
@@ -154,7 +148,7 @@ public class HomeScreen extends Activity {
 			listAdapter = new ExpandableListAdapter(this, result);
 		//}
         expListView.setAdapter(listAdapter);
-		textWeek.setText(app.getWeek(showWeekNumber, showYear));
+		textWeek.setText(app.getWeek(app.showWeekNumber, app.showYear));
 	}
 	
 	private OnClickListener atWorkBtnListener = new OnClickListener() {
@@ -176,7 +170,8 @@ public class HomeScreen extends Activity {
 	private OnClickListener leftBtnListener = new OnClickListener() {
 		
 		public void onClick(View arg0) {
-			showWeekNumber --;
+			app.changeWeek(-1);
+			//app.showWeekNumber --;
 			
 			//Change the log
 		   refreshData(null);   
@@ -186,7 +181,8 @@ public class HomeScreen extends Activity {
 	private OnClickListener rightBtnListener = new OnClickListener() {
 		
 		public void onClick(View arg0) {
-			showWeekNumber++;
+			app.changeWeek(1);
+			//app.showWeekNumber++;
 			
 			//Change the log
 		    refreshData(null);
@@ -237,7 +233,7 @@ public class HomeScreen extends Activity {
 	      * delivers it the parameters given to AsyncTask.execute() */
 	    protected HashMap<String, List<String>> doInBackground(Void... args) {
 	    	app.loadAllWorkLogs();
-	    	return app.getLogsOfWeek(showWeekNumber, showYear);
+	    	return app.getLogsOfWeek(app.showWeekNumber, app.showYear);
 	    }
 	    
 	    /** The system calls this to perform work in the UI thread and delivers

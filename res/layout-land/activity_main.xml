@@ -13,30 +13,53 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-        />
+        android:layout_centerVertical="true" />
 
-    <ScrollView
+    <LinearLayout
         android:id="@+id/sv_log"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/buttonLeft"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/btn_work" >
+        android:layout_toRightOf="@+id/btn_work"
+        android:orientation="vertical" >
 
-        <LinearLayout
+        <ExpandableListView
+            android:id="@+id/lvExp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content" >
+        </ExpandableListView>
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_log"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/logs" />
-        </LinearLayout>
-    </ScrollView>
+    <Button
+        android:id="@+id/buttonLeft"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_alignLeft="@+id/sv_log"
+        android:layout_alignParentTop="true"
+        android:text="L" />
+
+    <Button
+        android:id="@+id/buttonRight"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_alignBaseline="@+id/buttonLeft"
+        android:layout_alignBottom="@+id/buttonLeft"
+        android:layout_alignRight="@+id/sv_log"
+        android:text="R" />
+
+    <TextView
+        android:id="@+id/textWeek"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_alignTop="@+id/buttonRight"
+        android:layout_toLeftOf="@+id/buttonRight"
+        android:layout_toRightOf="@+id/buttonLeft"
+        android:gravity="center_vertical"
+        android:text="Medium Text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

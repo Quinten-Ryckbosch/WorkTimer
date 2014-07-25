@@ -79,6 +79,7 @@ public class WorkWeek extends WorkDay {
 		return thisWeeksLogs.get(Util.getIndex(day));
 	}
 	
+	
 	public ArrayList<WorkDay> getDays(){
 		ArrayList<WorkDay> list = new ArrayList<WorkDay>(thisWeeksLogs.values());
 		Collections.sort(list);
