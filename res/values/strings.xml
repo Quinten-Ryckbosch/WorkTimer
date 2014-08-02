@@ -8,6 +8,8 @@
     <string name="button_not_at_work">NOT AT WORK</string>
 	<string name="logs">Last check-ins here</string>
 	
+	<string name="networkName">telenet-50FBD</string>
+	
     
 
 </resources>

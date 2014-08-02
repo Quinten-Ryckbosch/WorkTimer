@@ -6,8 +6,12 @@ import java.util.List;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
@@ -21,55 +25,42 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import be.qrsdp.utils.Util;
 
 
 public class HomeScreen extends Activity {
-    
+
 	private MainApplication app;
 
 	Button atWorkBtn;
 	Button leftBtn, rightBtn;
-	
+
 	//TextView logsTextView;
 	TextView textWeek;
-	
-	NotificationCompat.Builder mBuilder;
-	int notifyID = 1;
-	
+
 	ExpandableListAdapter listAdapter;
-    ExpandableListView expListView;
-    List<String> listDataHeader;
-    HashMap<String, List<String>> listDataChild;
- 
-	
+	ExpandableListView expListView;
+
 	@Override
-    protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		System.out.println("HomeScreen Created");
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        
-        app = (MainApplication) getApplication();
-        
-        getGuiElementsFromLayout();
-        
-        //Get "atwork" state correct as soon as possible
-        app.loadCurrentWorkLog();
-    	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
-        
-    	//Create the notification
-    	loadNotification();
-        
-        //Load database in extra thread.
-        new LoadDataBaseTask().execute();
-        
-        //Network
-        //IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        //NetworkReceiver receiver = new NetworkReceiver();
-        //this.registerReceiver(receiver, filter);
-        
-    }
-	
-	
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+
+		app = (MainApplication) getApplication();
+
+		getGuiElementsFromLayout();
+
+		//Get "atwork" state correct as soon as possible
+		app.loadCurrentWorkLog();
+		atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
+
+		//Load database in extra thread.
+		new LoadDataBaseTask().execute();
+
+	}
+
+
 	private void getGuiElementsFromLayout() {
 		atWorkBtn = (Button) findViewById(R.id.btn_work);
 		leftBtn = (Button) findViewById(R.id.buttonLeft);
@@ -77,26 +68,26 @@ public class HomeScreen extends Activity {
 		textWeek = (TextView) findViewById(R.id.textWeek);
 		expListView = (ExpandableListView) findViewById(R.id.lvExp);
 	}
-	
+
 	@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-	
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle item selection
-	    switch (item.getItemId()) {
-	    case R.id.action_email:
-	        sendEmail();
-	        return true;
-	    default:
-	        return super.onOptionsItemSelected(item);
-	    }
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.action_email:
+			sendEmail();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
-	
+
 	private void sendEmail() {
 		System.out.println("Send the email.");
 		Intent i = new Intent(Intent.ACTION_SEND);
@@ -105,34 +96,10 @@ public class HomeScreen extends Activity {
 		i.putExtra(Intent.EXTRA_SUBJECT, "Work log");
 		i.putExtra(Intent.EXTRA_TEXT   , app.getLogsList());
 		try {
-		    startActivity(Intent.createChooser(i, "Send mail..."));
+			startActivity(Intent.createChooser(i, "Send mail..."));
 		} catch (android.content.ActivityNotFoundException ex) {
-		    Toast.makeText(HomeScreen.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(HomeScreen.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
 		}
-	}
-	
-	private void loadNotification(){
-		//Creating a notification
-        mBuilder = new NotificationCompat.Builder(this);
-        // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(this, HomeScreen.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(HomeScreen.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        
-        updateNotification();
-	}
-	
-	private void updateNotification(){
-		mBuilder.setSmallIcon(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
-        mBuilder.setContentTitle("WorkLogger");
-        mBuilder.setContentText(app.isAtWork() ? "Working" : "Not working");
-        mBuilder.setOngoing(true);
-        
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-	    mNotificationManager.notify(notifyID, mBuilder.build());
 	}
 
 	private void refreshData(HashMap<String, List<String>> result){
@@ -143,73 +110,74 @@ public class HomeScreen extends Activity {
 		if(result.size() == 0){
 			Toast.makeText(this, "No logs to show for this week", Toast.LENGTH_LONG).show();
 		}// else {
-			listAdapter = new ExpandableListAdapter(this, result);
+		listAdapter = new ExpandableListAdapter(this, result);
 		//}
-        expListView.setAdapter(listAdapter);
+		expListView.setAdapter(listAdapter);
 		textWeek.setText(app.getWeek(app.showWeekNumber, app.showYear));
 	}
-	
+
+	public void toggle(){
+		app.toggle();
+		//Change look of the button
+		atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
+
+		//Change the log
+		refreshData(null);
+
+		System.out.println("Atwork = " + app.isAtWork());
+	}
+
 	private OnClickListener atWorkBtnListener = new OnClickListener() {
-	    public void onClick(View v) {
-	      app.toggle();
-	      //Change look of the button
-	      atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
-	      
-	      //Change the log
-	      refreshData(null);
-	      
-	      //Change notification
-	      updateNotification();
-	      
-	      System.out.println("Atwork = " + app.isAtWork());
-	    }
+		public void onClick(View v) {
+			toggle();
+		}
 	};
-	
+
 	private OnClickListener leftBtnListener = new OnClickListener() {
-		
+
 		public void onClick(View arg0) {
 			app.changeWeek(-1);
 			//app.showWeekNumber --;
-			
+
 			//Change the log
-		   refreshData(null);   
+			refreshData(null);   
 		}
 	};
-	
+
 	private OnClickListener rightBtnListener = new OnClickListener() {
-		
+
 		public void onClick(View arg0) {
 			app.changeWeek(1);
 			//app.showWeekNumber++;
-			
+
 			//Change the log
-		    refreshData(null);
+			refreshData(null);
 		}
 	};
-	
+
 	private class LoadDataBaseTask extends AsyncTask<Void, Void, HashMap<String, List<String>>> {
-	    /** The system calls this to perform work in a worker thread and
-	      * delivers it the parameters given to AsyncTask.execute() */
-	    protected HashMap<String, List<String>> doInBackground(Void... args) {
-	    	app.loadAllWorkLogs();
-	    	return app.getLogsOfWeek(app.showWeekNumber, app.showYear);
-	    }
-	    
-	    /** The system calls this to perform work in the UI thread and delivers
-	      * the result from doInBackground() */
-	    protected void onPostExecute(HashMap<String, List<String>> result) {
-	    	atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
-	        atWorkBtn.setOnClickListener(atWorkBtnListener);
-	        leftBtn.setOnClickListener(leftBtnListener);
-	    	rightBtn.setOnClickListener(rightBtnListener);
-	        
-	        //Logs
-	        refreshData(result);
-	    }
-	    
-	    protected void onPreExecute(){
-	    	textWeek.setText("Loading logs..");
-	    }
+		/** The system calls this to perform work in a worker thread and
+		 * delivers it the parameters given to AsyncTask.execute() */
+		protected HashMap<String, List<String>> doInBackground(Void... args) {
+			app.loadAllWorkLogs();
+			return app.getLogsOfWeek(app.showWeekNumber, app.showYear);
+		}
+
+		/** The system calls this to perform work in the UI thread and delivers
+		 * the result from doInBackground() */
+		protected void onPostExecute(HashMap<String, List<String>> result) {
+			atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
+			atWorkBtn.setOnClickListener(atWorkBtnListener);
+			leftBtn.setOnClickListener(leftBtnListener);
+			rightBtn.setOnClickListener(rightBtnListener);
+
+			//Logs
+			refreshData(result);
+		}
+
+		protected void onPreExecute(){
+			textWeek.setText("Loading logs..");
+		}
 	}
 
 }
