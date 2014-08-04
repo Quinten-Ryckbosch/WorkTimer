@@ -9,11 +9,16 @@ import java.util.Map;
 
 import be.qrsdp.utils.Util;
 import android.app.Application;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 public class MainApplication extends Application {
@@ -29,6 +34,9 @@ public class MainApplication extends Application {
 	public int showWeekNumber, showYear;
 
 	private WorkDBHelper dataBaseHelper;
+	
+	NotificationCompat.Builder mBuilder;
+	int notifyID = 1;
 
 	@Override
 	public void onCreate() {
@@ -43,7 +51,9 @@ public class MainApplication extends Application {
     	showWeekNumber = getTodaysWeekNumber();
     	showYear = getTodaysYear();
     	
-    	Util.getSSID(this);
+    	//Create the notification
+    	loadNotification();
+
 		
 		super.onCreate();
 	}
@@ -124,6 +134,29 @@ public class MainApplication extends Application {
 			dataBaseHelper.updateRecord(endCurrWorkLog());
 		}
 		atWork = !atWork;
+		
+		//Change notification
+		updateNotification();
+	}
+	
+	public void toggleViaNetwork(boolean newState) {
+		WorkLog currentLog = dataBaseHelper.getCurrentLog();
+		if(currentLog == null){
+			//Prev state was: "Not at work", so no current log
+			if(newState){ //only make a new log when the new state is indeed "At work"
+				currentLog = new WorkLog();
+				dataBaseHelper.insertRecord(currentLog);
+				this.atWork = true;
+			}
+		} else {
+			if(!newState){ // only end the current log when the new state is indeed "Not at Work"
+				currentLog.endWorkBlock();
+				dataBaseHelper.updateRecord(currentLog);
+				this.atWork = false;
+			}
+		}
+		//Change notification
+		updateNotification();
 	}
 	
 
@@ -183,6 +216,29 @@ public class MainApplication extends Application {
 	}
 
 
+	private void loadNotification(){
+		//Creating a notification
+		mBuilder = new NotificationCompat.Builder(this);
+		// Creates an explicit intent for an Activity in your app
+		Intent resultIntent = new Intent(this, HomeScreen.class);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+		stackBuilder.addParentStack(HomeScreen.class);
+		stackBuilder.addNextIntent(resultIntent);
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
+
+		updateNotification();
+	}
+
+	private void updateNotification(){
+		mBuilder.setSmallIcon(isAtWork() ? R.drawable.working : R.drawable.notworking);
+		mBuilder.setContentTitle("WorkLogger");
+		mBuilder.setContentText(isAtWork() ? "Working" : "Not working");
+		mBuilder.setOngoing(true);
+
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(notifyID, mBuilder.build());
+	}
 }
 
 class WorkDBHelper extends SQLiteOpenHelper {

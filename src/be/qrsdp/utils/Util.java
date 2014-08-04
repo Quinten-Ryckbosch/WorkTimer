@@ -62,7 +62,8 @@ public class Util {
 	public static String getSSID(Context context){
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-		Log.d("SSID",wifiInfo.getSSID());
-		return wifiInfo.getSSID();
+		String ssid = wifiInfo.getSSID();
+		ssid = ssid.substring(1, ssid.length()-1);
+		return ssid;
 	}
 }

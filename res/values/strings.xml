@@ -10,6 +10,8 @@
 	<string name="ssid_of_work_wifi">SSID of work WiFi</string>
 	<string name="work_wifi">Work WiFi</string>
 	
+	<string name="networkName">telenet-50FBD</string>
+	
     
 
 </resources>
