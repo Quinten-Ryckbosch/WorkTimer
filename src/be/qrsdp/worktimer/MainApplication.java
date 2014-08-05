@@ -100,8 +100,8 @@ public class MainApplication extends Application implements
 		return getWorkWeek(cal).getDay(cal);
 	}
 
-	public void loadAllWorkLogs() {
-		if (!dataBaseLoaded) {
+	public void loadAllWorkLogs(boolean forse){
+		if(forse || !dataBaseLoaded){
 			ArrayList<WorkLog> workLogs = dataBaseHelper.getAllRecords();
 			Collections.sort(workLogs);
 
@@ -201,6 +201,10 @@ public class MainApplication extends Application implements
 		HashMap<String, List<String>> logsOfWeek = new HashMap<String, List<String>>();
 		System.err.println("Workweek map size: " + workWeeks.size());
 		WorkWeek week = getWorkWeek(weekNumber, year);
+		while(Util.cleanLogs(this, week)){
+			loadAllWorkLogs(true);
+			week = getWorkWeek(weekNumber, year);
+		}
 		System.err.println("index: " + Util.getWeekIndex(weekNumber, year));
 		// Per Day:
 		for (WorkDay workDay : week.getDays()) {
@@ -290,6 +294,27 @@ public class MainApplication extends Application implements
 			workNetworkSSID = sharedPreferences.getString(key, "");
 		}
 	}
+	
+	public void deleteLog(WorkLog log){
+		dataBaseHelper.deleteRecord(log);
+	}
+	
+	/**
+	 * Update the stopTime for this log based on the startTime
+	 * @param log
+	 */
+	public void updateLog(WorkLog log){
+		dataBaseHelper.updateRecord(log);
+	}
+	
+	public void addLog(WorkLog log){
+		dataBaseHelper.insertRecord(log);
+	}
+	
+	//DEBUG
+	public void spoofDataBase(){
+		dataBaseHelper.spoofDataBase();
+	}
 }
 
 class WorkDBHelper extends SQLiteOpenHelper {
@@ -325,9 +350,18 @@ class WorkDBHelper extends SQLiteOpenHelper {
 			Calendar from = (Calendar) now.clone();
 			from.add(Calendar.DAY_OF_MONTH, -1 * i);
 			Calendar to = (Calendar) from.clone();
-			to.add(Calendar.HOUR, -7);
-			insertRecord(new WorkLog(WorkLog.parseWorkLog(to),
-					WorkLog.parseWorkLog(from)));
+			to.add(Calendar.HOUR, 7);
+			insertRecord(new WorkLog(from, to));
+			from = (Calendar) to.clone();
+			from.add(Calendar.MINUTE, 1);
+			to = (Calendar) from.clone();
+			to.add(Calendar.HOUR, 1);
+			insertRecord(new WorkLog(from, to));
+			from = (Calendar) to.clone();
+			from.add(Calendar.HOUR, 1);
+			to = (Calendar) from.clone();
+			to.add(Calendar.MINUTE, 1);
+			insertRecord(new WorkLog(from, to));
 		}
 	}
 
@@ -370,6 +404,14 @@ class WorkDBHelper extends SQLiteOpenHelper {
 		Log.d(DBHELPER_TAG, "Record updated: " + updateQuery);
 		// TODO use dataBase.update instead of raw sql command.
 		dataBase.execSQL(updateQuery);
+	}
+	
+	public void deleteRecord(WorkLog log){
+		SQLiteDatabase dataBase = this.getWritableDatabase();
+		String deleteQuery = "DELETE FROM log WHERE StopTime='" + WorkLog.parseWorkLog(log.getStopTime())
+				+ "' AND StartTime='" + WorkLog.parseWorkLog(log.getStartTime()) + "'";
+		Log.d(DBHELPER_TAG, "Record deleted: " + deleteQuery);
+		dataBase.execSQL(deleteQuery);
 	}
 
 	public ArrayList<WorkLog> getAllRecords() {
