@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-import android.widget.Toast;
 import be.qrsdp.utils.Util;
 
 public class NetworkReceiver extends BroadcastReceiver {
@@ -21,7 +20,7 @@ public class NetworkReceiver extends BroadcastReceiver {
 		if(networkInfo != null)Log.d("app","New network state " + networkInfo.getType());
 		else Log.d("app","networkInfo is null ");
 		if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-			if(Util.getSSID(context).equalsIgnoreCase(context.getResources().getString(R.string.networkName))){
+			if(Util.getSSID(context).equalsIgnoreCase(app.getWorkNetworkSSID())){
 				Log.d("SSID","Connected to: " + Util.getSSID(context));
 				//Toast.makeText(context, "Connected to: " + Util.getSSID(context), Toast.LENGTH_SHORT).show();
 				app.toggleViaNetwork(true);

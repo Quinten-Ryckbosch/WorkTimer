@@ -1,21 +1,12 @@
-package be.qrsdp.worktimer;
+package be.qrsdp.worktimer.gui;
 
 import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +16,9 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import be.qrsdp.utils.Util;
+import be.qrsdp.worktimer.ExpandableListAdapter;
+import be.qrsdp.worktimer.MainApplication;
+import be.qrsdp.worktimer.R;
 
 
 public class HomeScreen extends Activity {
@@ -80,13 +73,33 @@ public class HomeScreen extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-		case R.id.action_email:
-			sendEmail();
-			return true;
+			case R.id.action_email:
+				sendEmail();
+				return true;
+			
+			case R.id.action_exit:
+				quitApp();
+				return true;
+				
+			case R.id.action_settings:
+				loadSettingsScreen();
+				return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
+
+	private void loadSettingsScreen() {
+	    Intent intent = new Intent(this, SettingsActivity.class);
+	    startActivity(intent);
+	}
+
+
+	private void quitApp() {
+		// TODO remove notification if not at work? (keep it if it is activated?)
+		finish();
+	}
+
 
 	private void sendEmail() {
 		System.out.println("Send the email.");

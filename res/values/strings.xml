@@ -9,9 +9,14 @@
 	<string name="logs">Last check-ins here</string>
 	<string name="ssid_of_work_wifi">SSID of work WiFi</string>
 	<string name="work_wifi">Work WiFi</string>
+	<string name="action_exit">Exit</string>
+	
 	
 	<string name="networkName">telenet-50FBD</string>
 	
     
+	<string name="pref_show_notification_summary">Always show notification in action bar</string>
+    <string name="pref_show_notification">Show notification</string>
+	
 
 </resources>

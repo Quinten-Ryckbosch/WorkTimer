@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="PREF_SHOW_NOTIFICATION"
+        android:summary="@string/pref_show_notification_summary"
+        android:title="@string/pref_show_notification" >
+    </CheckBoxPreference>
+
+    <EditTextPreference
+        android:dialogTitle="WORK_WIFI"
+        android:key="PREF_WORK_SSID"
+        android:summary="The SSID of the WiFi at work"
+        android:title="Work SSID" >
+    </EditTextPreference>
+
+</PreferenceScreen>
