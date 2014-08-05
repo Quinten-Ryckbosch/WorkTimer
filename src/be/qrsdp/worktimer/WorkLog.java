@@ -26,16 +26,28 @@ public class WorkLog implements Comparable<WorkLog> {
 		Log.d(WORKLOG_TAG, "Log parsed: " + getTotalString());
 	}
 	
-	void startWorkBlock(){
+	public WorkLog(Calendar startTime, Calendar stopTime) {
+		this.startTime = startTime;
+		this.stopTime = stopTime;
+		current = (this.stopTime == null);
+		//
+		Log.d(WORKLOG_TAG, "Log parsed: " + getTotalString());
+	}
+
+	public void startWorkBlock(){
 		startTime = Calendar.getInstance();
 		current = true;
 		Log.d(WORKLOG_TAG, "Started Working: " + getTotalString());
 	}
 	
-	void endWorkBlock(){
-		stopTime = Calendar.getInstance();
+	public void endWorkBlock(){
+		endWorkBlock(Calendar.getInstance());
+	}
+	
+	public void endWorkBlock(Calendar stopTime){
+		this.stopTime = stopTime;
 		current = false;
-		duration = (int)(this.stopTime.getTimeInMillis() - this.startTime.getTimeInMillis())/1000;
+		duration = (int)(this.stopTime.getTimeInMillis() - this.startTime.getTimeInMillis())/1000 / 60;
 		Log.d(WORKLOG_TAG, "Stoped Working: " + getTotalString());
 	}
 	

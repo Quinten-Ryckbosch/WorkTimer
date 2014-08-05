@@ -29,6 +29,7 @@ import be.qrsdp.utils.Util;
 
 
 public class HomeScreen extends Activity {
+	private final static String LOG_TAG = "HomeScreen";
 
 	private MainApplication app;
 
@@ -43,11 +44,12 @@ public class HomeScreen extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		System.out.println("HomeScreen Created");
+		Log.d(LOG_TAG, "Is Created");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
 		app = (MainApplication) getApplication();
+		//app.spoofDataBase();
 
 		getGuiElementsFromLayout();
 
@@ -159,7 +161,7 @@ public class HomeScreen extends Activity {
 		/** The system calls this to perform work in a worker thread and
 		 * delivers it the parameters given to AsyncTask.execute() */
 		protected HashMap<String, List<String>> doInBackground(Void... args) {
-			app.loadAllWorkLogs();
+			app.loadAllWorkLogs(false);
 			return app.getLogsOfWeek(app.showWeekNumber, app.showYear);
 		}
 

@@ -1,7 +1,14 @@
 package be.qrsdp.utils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 
+import be.qrsdp.worktimer.MainApplication;
+import be.qrsdp.worktimer.WorkDay;
+import be.qrsdp.worktimer.WorkLog;
+import be.qrsdp.worktimer.WorkWeek;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -25,6 +32,87 @@ public class Util {
 	public static String getTwoDigitNumber(int i){
 		if(i < 10) return "0" + i;
 		return "" + i;
+	}
+	
+	/**
+	 * Clean log for this week.
+	 * Only clean for one week, otherwise this would take to much time even without changing anything.
+	 * 
+	 * @param app
+	 * @param week
+	 * @return
+	 */
+	public static boolean cleanLogs(MainApplication app, WorkWeek week) {
+		boolean changed = false;
+		//Split logs that overlap days.
+		for(WorkDay day: week.getDays()){
+			for(WorkLog log: day.getLogs()){
+				if(log.getStopTime() != null){ // Current log is a special case
+					if(log.getStartTime().get(Calendar.DAY_OF_YEAR) != log.getStopTime().get(Calendar.DAY_OF_YEAR)){
+						Log.d("cleanLogs", "Changing log " + log.getTotalString());
+
+						//split log
+						changed = true;
+
+						Calendar newStartTime = (Calendar) log.getStopTime().clone();
+						newStartTime.set(Calendar.HOUR_OF_DAY, 0);
+						newStartTime.set(Calendar.MINUTE, 0);
+						newStartTime.set(Calendar.SECOND, 0);
+						newStartTime.set(Calendar.MILLISECOND, 0);
+						WorkLog newLog = new WorkLog(newStartTime, log.getStopTime());
+						app.addLog(newLog);
+						Calendar newStopTime = (Calendar) newStartTime.clone();
+						newStopTime.add(Calendar.MILLISECOND, -1);
+						log.endWorkBlock(newStopTime);
+						app.updateLog(log);
+
+					}
+				}
+			}
+		}
+		
+		//Before removing small logs, try to merge them to get a bigger log.
+		
+		if(!changed){
+			//merge logs when stop and restart time is less then 10 minutes
+			for(WorkDay day: week.getDays()){ // look per day (otherwise previous "daysplit" will be merged)
+				ArrayList<WorkLog> logs = day.getLogs();
+				Collections.reverse(logs);
+				for(int index = 1; index < logs.size(); index ++){
+					Calendar lastStopTime = logs.get(index - 1).getStopTime();
+					Calendar nextStartTime = logs.get(index).getStartTime();
+					if(lastStopTime != null){	//normally only the last log has a stoptime == null, but hey.
+						long diff = nextStartTime.getTimeInMillis() - lastStopTime.getTimeInMillis();
+						if(diff < 10 * 60 * 1000){
+							//Log.d("UTIL", "first = " + logs.get(index-1).getTotalString());
+							//Log.d("UTIL", "second= " + logs.get(index).getTotalString());
+							changed = true;
+							WorkLog mergedLog = new WorkLog(logs.get(index-1).getStartTime(), logs.get(index).getStopTime());
+							app.updateLog(mergedLog); //actually new logs.get(index-1) log (same startTime)
+							app.deleteLog(logs.get(index));
+							break;	//logs list is out dated.
+						}
+					}
+				}
+			}
+		}
+		
+		if(!changed){
+			//remove logs when duration is less than 10 minutes
+			for(WorkDay day: week.getDays()){
+				for(WorkLog log: day.getLogs()){
+					if(log.getStopTime() != null){
+						long diff = log.getStopTime().getTimeInMillis() - log.getStartTime().getTimeInMillis();
+						if(diff < 10 * 60 * 1000){
+							changed = true;
+							app.deleteLog(log);
+							break;	//logs list is out dated.
+						}
+					}
+				}
+			}
+		}
+		return changed;
 	}
 	
 	//Doesn't belong here
