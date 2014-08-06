@@ -168,21 +168,20 @@ public class MainApplication extends Application implements
 
 	public void toggleViaNetwork(boolean newState) {
 		WorkLog currentLog = dataBaseHelper.getCurrentLog();
-		if (currentLog == null) {
+		this.atWork = (currentLog != null);
+		
+		if (this.atWork != newState) {
 			// Prev state was: "Not at work", so no current log
 			if (newState) { // only make a new log when the new state is indeed
-							// "At work"
+						   // "At work"
 				currentLog = new WorkLog();
 				dataBaseHelper.insertRecord(currentLog);
-				this.atWork = true;
-			}
-		} else {
-			if (!newState) { // only end the current log when the new state is
-								// indeed "Not at Work"
+			} else { // only end the current log when the new state is
+					// indeed "Not at Work"
 				currentLog.endWorkBlock();
 				dataBaseHelper.updateRecord(currentLog);
-				this.atWork = false;
 			}
+			this.atWork = newState;
 		}
 		// Change notification
 		updateNotification();
@@ -269,8 +268,7 @@ public class MainApplication extends Application implements
 	}
 
 	private void updateNotification() {
-		mBuilder.setSmallIcon(isAtWork() ? R.drawable.working
-				: R.drawable.notworking);
+		mBuilder.setSmallIcon(isAtWork() ? R.drawable.working : R.drawable.notworking);
 		mBuilder.setContentTitle("WorkLogger");
 		mBuilder.setContentText(isAtWork() ? "Working" : "Not working");
 		mBuilder.setOngoing(true);

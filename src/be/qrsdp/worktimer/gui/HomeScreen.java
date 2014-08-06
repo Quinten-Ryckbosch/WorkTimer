@@ -157,6 +157,9 @@ public class HomeScreen extends Activity {
 			toggle();
 			
 			app.resetWeekToShow();
+			
+			//Change the log
+			refreshData(null);
 		}
 	};
 
