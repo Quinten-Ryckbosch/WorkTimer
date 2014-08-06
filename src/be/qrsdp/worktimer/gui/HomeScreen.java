@@ -141,10 +141,22 @@ public class HomeScreen extends Activity {
 
 		System.out.println("Atwork = " + app.isAtWork());
 	}
+	
+	private OnClickListener weekTextListener = new OnClickListener() {
+		
+		public void onClick(View v) {
+			app.resetWeekToShow();
+			
+			//Change the log
+			refreshData(null);
+		}
+	};
 
 	private OnClickListener atWorkBtnListener = new OnClickListener() {
 		public void onClick(View v) {
 			toggle();
+			
+			app.resetWeekToShow();
 		}
 	};
 
@@ -185,6 +197,7 @@ public class HomeScreen extends Activity {
 			atWorkBtn.setOnClickListener(atWorkBtnListener);
 			leftBtn.setOnClickListener(leftBtnListener);
 			rightBtn.setOnClickListener(rightBtnListener);
+			textWeek.setOnClickListener(weekTextListener);
 
 			//Logs
 			refreshData(result);

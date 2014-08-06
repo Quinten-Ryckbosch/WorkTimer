@@ -75,6 +75,13 @@ public class MainApplication extends Application implements
 
 		super.onCreate();
 	}
+	
+	public void resetWeekToShow() {
+		Calendar now = Calendar.getInstance();
+		this.showWeekNumber  = now.get(Calendar.WEEK_OF_YEAR);
+		this.showYear = now.get(Calendar.YEAR);
+		
+	}
 
 	public void loadCurrentWorkLog() {
 		if (!dataBaseLoaded) {
