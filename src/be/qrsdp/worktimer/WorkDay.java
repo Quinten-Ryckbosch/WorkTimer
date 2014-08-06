@@ -3,8 +3,7 @@ package be.qrsdp.worktimer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-
-import be.qrsdp.utils.Util;
+import java.util.Locale;
 
 public class WorkDay extends WorkLog{
 	private Calendar day;
@@ -60,8 +59,9 @@ public class WorkDay extends WorkLog{
 	}
 	
 	public String getString(){
-		return day.get(Calendar.DAY_OF_MONTH)
-				+ " " + Util.MONTH_NAMES_SHORT[day.get(Calendar.MONTH)];
+		return day.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault())
+				+ " " + day.get(Calendar.DAY_OF_MONTH)
+				+ " " + day.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
 	}
 	
 	public ArrayList<WorkLog> getLogs(){

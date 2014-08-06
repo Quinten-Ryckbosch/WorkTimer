@@ -14,8 +14,7 @@ import be.qrsdp.worktimer.WorkLog;
 import be.qrsdp.worktimer.WorkWeek;
 
 public class Util {
-	public final static String[] MONTH_NAMES_SHORT = {"Jan", "Feb", "Mrt", "Apr", "Mei", "Jun", "Jul", "Aug", "Sept", "Okt", "Nov", "Dec"};
-
+	
 	public static int getIndex(Calendar cal){
 		return cal.get(Calendar.YEAR) * 100 + cal.get(Calendar.DAY_OF_YEAR);
 	}
@@ -139,12 +138,12 @@ public class Util {
 	}
 	
 	//Doesn't belong here
-	public static String getWeekString(Calendar[] days){
+	/*public static String getWeekString(Calendar[] days){
 		return days[0].get(Calendar.DAY_OF_MONTH)
 				+ " " + MONTH_NAMES_SHORT[days[0].get(Calendar.MONTH)]
 				+ " - " + days[1].get(Calendar.DAY_OF_MONTH)
 				+ " " + MONTH_NAMES_SHORT[days[1].get(Calendar.MONTH)];
-	}
+	}*/
 	
 	public static String getSSID(Context context){
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);

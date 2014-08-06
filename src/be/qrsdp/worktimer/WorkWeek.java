@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import be.qrsdp.utils.Util;
@@ -61,9 +62,9 @@ public class WorkWeek extends WorkDay {
 		lastDay.add(Calendar.DAY_OF_YEAR, 6);
 		
 		return firstDay.get(Calendar.DAY_OF_MONTH)
-				+ " " + Util.MONTH_NAMES_SHORT[firstDay.get(Calendar.MONTH)]
+				+ " " + firstDay.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())
 				+ " - " + lastDay.get(Calendar.DAY_OF_MONTH)
-				+ " " + Util.MONTH_NAMES_SHORT[lastDay.get(Calendar.MONTH)];
+				+ " " + lastDay.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
 	}
 	
 	public ArrayList<WorkLog> getLogs(){

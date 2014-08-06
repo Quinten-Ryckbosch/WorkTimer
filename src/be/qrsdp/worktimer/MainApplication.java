@@ -217,11 +217,9 @@ public class MainApplication extends Application implements
 			if (workDay.getLogs().size() > 0) {
 				List<String> dayList = new ArrayList<String>();
 				for (WorkLog log : workDay.getLogs()) {
-					dayList.add(log.getString() + " - "
-							+ getDurationString(log.getDuration()));
+					dayList.add(log.getString() + " \t" + getDurationString(log.getDuration()));
 				}
-				logsOfWeek.put(workDay.getString() + "  \t"
-						+ getDurationString(workDay.getDuration()), dayList);
+				logsOfWeek.put(workDay.getString() + "  \t" + getDurationString(workDay.getDuration()), dayList);
 
 			}
 		}
@@ -229,11 +227,12 @@ public class MainApplication extends Application implements
 	}
 
 	private String getDurationString(int duration) {
+		String time = "";
 		if (duration >= 60) {
-			return Math.round(duration / 6.0) / 10.0 + " hours";
-		} else {
-			return duration + " min";
+			time += (int)Math.floor(duration / 60.0) + "u";
 		}
+		time += duration % 60 + "m";
+		return time;
 	}
 
 	public void changeWeek(int i) {

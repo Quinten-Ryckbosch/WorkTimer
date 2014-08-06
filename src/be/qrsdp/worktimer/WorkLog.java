@@ -89,6 +89,7 @@ public class WorkLog implements Comparable<WorkLog> {
 		return time;
 	}
 	
+	//For debug only
 	public String getTotalString(){
 		String time = "";
 		time += Util.getTwoDigitNumber(startTime.get(Calendar.DAY_OF_MONTH))
