@@ -39,7 +39,7 @@
         android:layout_height="25dp"
         android:layout_alignLeft="@+id/sv_log"
         android:layout_alignParentTop="true"
-        android:text="L" />
+        android:background="@drawable/left_arrow" />
 
     <Button
         android:id="@+id/buttonRight"
@@ -49,16 +49,18 @@
         android:layout_alignBaseline="@+id/buttonLeft"
         android:layout_alignBottom="@+id/buttonLeft"
         android:layout_alignRight="@+id/sv_log"
-        android:text="R" />
+        android:background="@drawable/right_arrow" />
 
     <TextView
         android:id="@+id/textWeek"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="25dp"
         android:layout_alignTop="@+id/buttonRight"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/buttonRight"
         android:layout_toRightOf="@+id/buttonLeft"
-        android:gravity="center_vertical"
+        android:gravity="center_vertical|center"
         android:text="Medium Text"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
