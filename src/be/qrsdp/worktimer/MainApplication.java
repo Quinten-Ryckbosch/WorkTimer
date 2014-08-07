@@ -40,8 +40,8 @@ public class MainApplication extends Application implements
 	private boolean atWork;
 	private boolean dataBaseLoaded = false;
 
+	//settings
 	private String workNetworkSSID;
-
 	private boolean showNotification;
 
 	public int showWeekNumber, showYear;
@@ -67,8 +67,9 @@ public class MainApplication extends Application implements
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPref.registerOnSharedPreferenceChangeListener(this);
 		//TODO unregister at appropriate time (whenever that is...)
-		
 		showNotification = sharedPref.getBoolean(KEY_PREF_SHOW_NOTIFICATOIN, true);
+		workNetworkSSID = sharedPref.getString(KEY_PREF_WORK_SSID, "");
+		
 		// Create the notification
 		loadNotification();
 		
@@ -282,9 +283,8 @@ public class MainApplication extends Application implements
 		}
 	}
 
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-			String key) {
-
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		Log.d("Settings",key + " setting is changed");
 		if (key.equals(KEY_PREF_SHOW_NOTIFICATOIN)) {
 			showNotification = sharedPreferences.getBoolean(key, true);
 
