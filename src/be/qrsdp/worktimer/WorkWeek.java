@@ -29,6 +29,10 @@ public class WorkWeek extends WorkDay {
 		}
 	}
 	
+	public Calendar getFirstDay(){
+		return firstDay;
+	}
+	
 	public boolean addWorkLog(WorkLog log){
 		thisWeeksLogs.get(Util.getIndex(log.getStartTime())).addWorkLog(log);
 		duration += log.getDuration();
@@ -84,6 +88,10 @@ public class WorkWeek extends WorkDay {
 		ArrayList<WorkDay> list = new ArrayList<WorkDay>(thisWeeksLogs.values());
 		Collections.sort(list);
 		return list;
+	}
+	
+	public int compareTo(WorkWeek arg0) {
+		return (arg0.getFirstDay().compareTo(this.getFirstDay()));
 	}
 
 }

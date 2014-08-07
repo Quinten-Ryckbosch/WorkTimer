@@ -36,8 +36,10 @@ public class Util {
 		String time = "";
 		if (duration >= 60) {
 			time += (int)Math.floor(duration / 60.0) + "u";
+			time += Util.getTwoDigitNumber(duration % 60) + "m";
+		} else {
+			time += duration % 60 + "m";
 		}
-		time += duration % 60 + "m";
 		return time;
 	}
 	

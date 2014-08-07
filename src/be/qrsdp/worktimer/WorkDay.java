@@ -81,4 +81,8 @@ public class WorkDay extends WorkLog{
 		}
 		return null;
 	}
+	
+	public int compareTo(WorkDay arg0) {
+		return (arg0.getDay().compareTo(this.getDay()));
+	}
 }
