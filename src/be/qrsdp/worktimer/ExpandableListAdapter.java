@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import be.qrsdp.utils.Util;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
@@ -16,15 +17,15 @@ import android.widget.TextView;
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	private Context _context;
-    private List<String> _listDataHeader; // header titles
+    private List<WorkDay> _listDataHeader; // header titles
     // child data in format of header title, child title
-    private HashMap<String, List<String>> _listDataChild;
+    private HashMap<WorkDay, List<WorkLog>> _listDataChild;
  
-    public ExpandableListAdapter(Context context, HashMap<String, List<String>> listChildData) {
+    public ExpandableListAdapter(Context context, HashMap<WorkDay, List<WorkLog>> listChildData) {
         this._context = context;
-        this._listDataHeader = new ArrayList<String>(listChildData.keySet());
+        this._listDataHeader = new ArrayList<WorkDay>(listChildData.keySet());
         Collections.sort(_listDataHeader);
-        Collections.reverse(_listDataHeader);
+        //Collections.reverse(_listDataHeader);
         this._listDataChild = listChildData;
     }
  
@@ -40,7 +41,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
             boolean isLastChild, View convertView, ViewGroup parent) {
  
-        final String childText = (String) getChild(groupPosition, childPosition);
+    	WorkLog log = (WorkLog)getChild(groupPosition, childPosition);
+        final String childText = log.getString()
+        		+ " \t" + Util.getDurationString(log.getDuration());
  
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
@@ -74,7 +77,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
  
     public View getGroupView(int groupPosition, boolean isExpanded,
             View convertView, ViewGroup parent) {
-        String headerTitle = (String) getGroup(groupPosition);
+    	
+    	WorkDay day = (WorkDay) getGroup(groupPosition);
+        String headerTitle = day.getString()
+        		+ " \t" + Util.getDurationString(day.getDuration());
+        
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

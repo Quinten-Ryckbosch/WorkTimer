@@ -32,6 +32,15 @@ public class Util {
 		return "" + i;
 	}
 	
+	public static String getDurationString(int duration) {
+		String time = "";
+		if (duration >= 60) {
+			time += (int)Math.floor(duration / 60.0) + "u";
+		}
+		time += duration % 60 + "m";
+		return time;
+	}
+	
 	/**
 	 * Clean log for this week.
 	 * Only clean for one week, otherwise this would take to much time even without changing anything.

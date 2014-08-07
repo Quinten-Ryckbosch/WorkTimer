@@ -88,6 +88,8 @@ public class MainApplication extends Application implements
 		if (!dataBaseLoaded) {
 			this.currentLog = dataBaseHelper.getCurrentLog();
 			this.atWork = (this.currentLog != null);
+			
+			updateNotification();
 		}
 	}
 
@@ -204,8 +206,8 @@ public class MainApplication extends Application implements
 		return workWeeks.get(Util.getWeekIndex(weekNumber, year)).getString();
 	}
 
-	public HashMap<String, List<String>> getLogsOfWeek(int weekNumber, int year) {
-		HashMap<String, List<String>> logsOfWeek = new HashMap<String, List<String>>();
+	public HashMap<WorkDay, List<WorkLog>> getLogsOfWeek(int weekNumber, int year) {
+		HashMap<WorkDay, List<WorkLog>> logsOfWeek = new HashMap<WorkDay, List<WorkLog>>();
 		System.err.println("Workweek map size: " + workWeeks.size());
 		WorkWeek week = getWorkWeek(weekNumber, year);
 		while(Util.cleanLogs(this, week)){
@@ -216,24 +218,15 @@ public class MainApplication extends Application implements
 		// Per Day:
 		for (WorkDay workDay : week.getDays()) {
 			if (workDay.getLogs().size() > 0) {
-				List<String> dayList = new ArrayList<String>();
+				List<WorkLog> dayList = new ArrayList<WorkLog>();
 				for (WorkLog log : workDay.getLogs()) {
-					dayList.add(log.getString() + " \t" + getDurationString(log.getDuration()));
+					dayList.add(log);
 				}
-				logsOfWeek.put(workDay.getString() + "  \t" + getDurationString(workDay.getDuration()), dayList);
+				logsOfWeek.put(workDay, dayList);
 
 			}
 		}
 		return logsOfWeek;
-	}
-
-	private String getDurationString(int duration) {
-		String time = "";
-		if (duration >= 60) {
-			time += (int)Math.floor(duration / 60.0) + "u";
-		}
-		time += duration % 60 + "m";
-		return time;
 	}
 
 	public void changeWeek(int i) {

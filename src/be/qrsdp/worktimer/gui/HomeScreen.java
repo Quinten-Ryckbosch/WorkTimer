@@ -19,6 +19,8 @@ import android.widget.Toast;
 import be.qrsdp.worktimer.ExpandableListAdapter;
 import be.qrsdp.worktimer.MainApplication;
 import be.qrsdp.worktimer.R;
+import be.qrsdp.worktimer.WorkDay;
+import be.qrsdp.worktimer.WorkLog;
 
 
 public class HomeScreen extends Activity {
@@ -117,7 +119,7 @@ public class HomeScreen extends Activity {
 		}
 	}
 
-	private void refreshData(HashMap<String, List<String>> result){
+	private void refreshData(HashMap<WorkDay, List<WorkLog>> result){
 		Log.d("HOMESCREEN", "show data for weeknumber: " + app.showWeekNumber);
 		if(result == null){
 			result = app.getLogsOfWeek(app.showWeekNumber, app.showYear);
@@ -185,17 +187,17 @@ public class HomeScreen extends Activity {
 		}
 	};
 
-	private class LoadDataBaseTask extends AsyncTask<Void, Void, HashMap<String, List<String>>> {
+	private class LoadDataBaseTask extends AsyncTask<Void, Void, HashMap<WorkDay, List<WorkLog>>> {
 		/** The system calls this to perform work in a worker thread and
 		 * delivers it the parameters given to AsyncTask.execute() */
-		protected HashMap<String, List<String>> doInBackground(Void... args) {
+		protected HashMap<WorkDay, List<WorkLog>> doInBackground(Void... args) {
 			app.loadAllWorkLogs(false);
 			return app.getLogsOfWeek(app.showWeekNumber, app.showYear);
 		}
 
 		/** The system calls this to perform work in the UI thread and delivers
 		 * the result from doInBackground() */
-		protected void onPostExecute(HashMap<String, List<String>> result) {
+		protected void onPostExecute(HashMap<WorkDay, List<WorkLog>> result) {
 			atWorkBtn.setBackgroundResource(app.isAtWork() ? R.drawable.working : R.drawable.notworking);
 			atWorkBtn.setOnClickListener(atWorkBtnListener);
 			leftBtn.setOnClickListener(leftBtnListener);
