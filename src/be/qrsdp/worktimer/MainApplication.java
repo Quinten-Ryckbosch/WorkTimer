@@ -51,8 +51,7 @@ public class MainApplication extends Application {
 		// dataBaseHelper.spoofDataBase();
 
 		// Weeknumber
-		showWeekNumber = getTodaysWeekNumber();
-		showYear = getTodaysYear();
+		resetWeekToShow();
 
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPref.registerOnSharedPreferenceChangeListener(new WorkTimePreferenceChangeListener(this));
@@ -67,6 +66,7 @@ public class MainApplication extends Application {
 		super.onCreate();
 	}
 	
+	//setter and Getters
 	public Notification getNotification() {
 		return notification;
 	}
@@ -75,70 +75,26 @@ public class MainApplication extends Application {
 		this.notification = notification;
 	}
 	
-	public void resetWeekToShow() {
-		Calendar now = Calendar.getInstance();
-		this.showWeekNumber  = now.get(Calendar.WEEK_OF_YEAR);
-		this.showYear = now.get(Calendar.YEAR);
-		
+	public boolean isAlwaysShowNotification() {
+		return alwaysShowNotification;
 	}
 
-	public void loadCurrentWorkLog() {
-		if (!dataBaseLoaded) {
-			this.currentLog = dataBaseHelper.getCurrentLog();
-			this.atWork = (this.currentLog != null);
-			
-			getNotification().updateNotification(isAtWork());
-		}
+	public void setAlwaysShowNotification(boolean alwaysShowNotification) {
+		this.alwaysShowNotification = alwaysShowNotification;
+	}
+	
+	public String getWorkNetworkSSID() {
+		return workNetworkSSID;
 	}
 
-	public WorkWeek getWorkWeek(Calendar cal) {
-		return getWorkWeek(cal.get(Calendar.WEEK_OF_YEAR),
-				cal.get(Calendar.YEAR));
+	public void setWorkNetworkSSID(String workNetworkSSID) {
+		this.workNetworkSSID = workNetworkSSID;
 	}
-
-	public WorkWeek getWorkWeek(int weekNumber, int year) {
-		if (workWeeks.get(Util.getWeekIndex(weekNumber, year)) == null) {
-			workWeeks.put(Util.getWeekIndex(weekNumber, year), new WorkWeek(
-					weekNumber, year));
-		}
-		return workWeeks.get(Util.getWeekIndex(weekNumber, year));
+	
+	public boolean isAtWork() {
+		return atWork;
 	}
-
-	public WorkDay getWorkDayLog(Calendar cal) {
-		return getWorkWeek(cal).getDay(cal);
-	}
-
-	public void loadAllWorkLogs(boolean forse){
-		if(forse || !dataBaseLoaded){
-			ArrayList<WorkLog> workLogs = dataBaseHelper.getAllRecords();
-			Collections.sort(workLogs);
-
-			atWork = isAtWork(workLogs);
-			dataBaseLoaded = true;
-
-			workWeeks = new SparseArray<WorkWeek>();
-			for (WorkLog log : workLogs) {
-				if (getWorkDayLog(log.getStartTime()) == null) {
-					System.err.println("Heel raar");
-				}
-				getWorkDayLog(log.getStartTime()).addWorkLog(log);
-			}
-		}
-	}
-
-	public WorkLog startNewWorkLog() {
-		currentLog = new WorkLog();
-		WorkDay day = getWorkDayLog(currentLog.getStartTime());
-		day.addWorkLog(currentLog);
-		return currentLog;
-	}
-
-	public WorkLog endCurrWorkLog() {
-		WorkDay day = getWorkDayLog(currentLog.getStartTime());
-		day.endWorkLog(currentLog);
-		return currentLog;
-	}
-
+	
 	private boolean isAtWork(ArrayList<WorkLog> workLogs) {
 		for (WorkLog log : workLogs) {
 			if (log.isCurrent()) {
@@ -148,9 +104,73 @@ public class MainApplication extends Application {
 		}
 		return false;
 	}
+	
+	//application stuff
+	
+	public void resetWeekToShow() {
+		this.showWeekNumber  = getTodaysWeekNumber();
+		this.showYear = getTodaysYear();
+	}
+	
+	private int getTodaysWeekNumber() {
+		return Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+	}
 
-	public boolean isAtWork() {
-		return atWork;
+	private int getTodaysYear() {
+		return Calendar.getInstance().get(Calendar.YEAR);
+	}
+	
+	public void changeWeek(int i) {
+		showWeekNumber += i;
+		if (showWeekNumber > 52) {
+			showWeekNumber -= 52;
+			showYear++;
+		}
+		if (showWeekNumber < 1) {
+			showWeekNumber += 52;
+			showYear--;
+		}
+	}
+
+	
+	public WorkWeek getWorkWeek(Calendar cal) {
+		return getWorkWeek(cal.get(Calendar.WEEK_OF_YEAR), cal.get(Calendar.YEAR));
+	}
+
+	public WorkWeek getWorkWeek(int weekNumber, int year) {
+		if (workWeeks.get(Util.getWeekIndex(weekNumber, year)) == null) {
+			workWeeks.put(Util.getWeekIndex(weekNumber, year), new WorkWeek(weekNumber, year));
+		}
+		return workWeeks.get(Util.getWeekIndex(weekNumber, year));
+	}
+
+	/*
+	 * OLDCODE
+	 * public WorkDay getWorkDayLog(Calendar cal) {
+		return getWorkWeek(cal).getDay(cal);
+	}*/
+	
+	public boolean addNewWorkLog(WorkLog log){
+		return getWorkWeek(log.getStartTime()).addWorkLog(log);
+	}
+	
+	public WorkLog startNewWorkLog() {
+		currentLog = new WorkLog();
+		addNewWorkLog(currentLog);
+		
+		//OLDCODE
+		//WorkDay day = getWorkDayLog(currentLog.getStartTime());
+		//day.addWorkLog(currentLog);
+		return currentLog;
+	}
+
+	public WorkLog endCurrWorkLog() {
+		getWorkWeek(currentLog.getStartTime()).endWorkLog(currentLog);
+		
+		//OLDCODE
+		//WorkDay day = getWorkDayLog(currentLog.getStartTime());
+		//day.endWorkLog(currentLog);
+		return currentLog;
 	}
 
 	public void toggle() {
@@ -188,71 +208,38 @@ public class MainApplication extends Application {
 		getNotification().updateNotification(isAtWork());
 	}
 
-	public String getLogsList() {
-		return "TODO";
-	}
-
-	public int getTodaysWeekNumber() {
-		return Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
-	}
-
-	public int getTodaysYear() {
-		return Calendar.getInstance().get(Calendar.YEAR);
-	}
-
-	public String getWeek(int weekNumber, int year) {
-		return workWeeks.get(Util.getWeekIndex(weekNumber, year)).getString();
-	}
-
 	public HashMap<WorkDay, List<WorkLog>> getLogsOfWeek(int weekNumber, int year) {
-		HashMap<WorkDay, List<WorkLog>> logsOfWeek = new HashMap<WorkDay, List<WorkLog>>();
-		System.err.println("Workweek map size: " + workWeeks.size());
-		WorkWeek week = getWorkWeek(weekNumber, year);
-		while(Util.cleanLogs(this, week)){
+		while(Util.cleanLogs(this, getWorkWeek(weekNumber, year))){
 			loadAllWorkLogs(true);
-			week = getWorkWeek(weekNumber, year);
 		}
-		System.err.println("index: " + Util.getWeekIndex(weekNumber, year));
-		// Per Day:
-		for (WorkDay workDay : week.getDays()) {
-			if (workDay.getLogs().size() > 0) {
-				List<WorkLog> dayList = new ArrayList<WorkLog>();
-				for (WorkLog log : workDay.getLogs()) {
-					dayList.add(log);
-				}
-				logsOfWeek.put(workDay, dayList);
+		return getWorkWeek(weekNumber, year).getLogs();
+	}
 
+	//Database stuff
+	
+	public void loadCurrentWorkLog() {
+		if (!dataBaseLoaded) {
+			this.currentLog = dataBaseHelper.getCurrentLog();
+			this.atWork = (this.currentLog != null);
+			
+			getNotification().updateNotification(isAtWork());
+		}
+	}
+
+	public void loadAllWorkLogs(boolean forse){
+		if(forse || !dataBaseLoaded){
+			ArrayList<WorkLog> workLogs = dataBaseHelper.getAllRecords();
+			Collections.sort(workLogs);
+
+			atWork = isAtWork(workLogs);
+			dataBaseLoaded = true;
+
+			workWeeks = new SparseArray<WorkWeek>();
+			for (WorkLog log : workLogs) {
+				addNewWorkLog(log);
+				//OLDCODE getWorkDayLog(log.getStartTime()).addWorkLog(log);
 			}
 		}
-		return logsOfWeek;
-	}
-
-	public void changeWeek(int i) {
-		showWeekNumber += i;
-		if (showWeekNumber > 52) {
-			showWeekNumber -= 52;
-			showYear++;
-		}
-		if (showWeekNumber < 1) {
-			showWeekNumber += 52;
-			showYear--;
-		}
-	}
-	
-	public boolean isAlwaysShowNotification() {
-		return alwaysShowNotification;
-	}
-
-	public void setAlwaysShowNotification(boolean alwaysShowNotification) {
-		this.alwaysShowNotification = alwaysShowNotification;
-	}
-	
-	public String getWorkNetworkSSID() {
-		return workNetworkSSID;
-	}
-
-	public void setWorkNetworkSSID(String workNetworkSSID) {
-		this.workNetworkSSID = workNetworkSSID;
 	}
 	
 	public void deleteLog(WorkLog log){

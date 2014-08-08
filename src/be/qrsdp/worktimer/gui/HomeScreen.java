@@ -110,7 +110,7 @@ public class HomeScreen extends Activity {
 		i.setType("message/rfc822");
 		i.putExtra(Intent.EXTRA_EMAIL  , new String[]{""});
 		i.putExtra(Intent.EXTRA_SUBJECT, "Work log");
-		i.putExtra(Intent.EXTRA_TEXT   , app.getLogsList());
+		i.putExtra(Intent.EXTRA_TEXT   , "TODO");
 		try {
 			startActivity(Intent.createChooser(i, "Send mail..."));
 		} catch (android.content.ActivityNotFoundException ex) {
@@ -129,7 +129,7 @@ public class HomeScreen extends Activity {
 		listAdapter = new ExpandableListAdapter(this, result);
 		//}
 		expListView.setAdapter(listAdapter);
-		textWeek.setText(app.getWeek(app.showWeekNumber, app.showYear));
+		textWeek.setText(app.getWorkWeek(app.showWeekNumber, app.showYear).getString());
 	}
 
 	public void toggle(){

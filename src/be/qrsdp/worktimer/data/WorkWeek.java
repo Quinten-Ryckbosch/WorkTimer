@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -71,12 +72,19 @@ public class WorkWeek implements Comparable<WorkWeek> {
 				+ " " + lastDay.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
 	}
 	
-	public ArrayList<WorkLog> getLogs(){
-		ArrayList<WorkLog> list = new ArrayList<WorkLog>();
-		for(WorkDay day: thisWeeksLogs.values()){
-			list.addAll(day.getLogs());
+	public HashMap<WorkDay, List<WorkLog>> getLogs(){
+		HashMap<WorkDay, List<WorkLog>> logsOfWeek = new HashMap<WorkDay, List<WorkLog>>();
+		// Per Day:
+		for (WorkDay workDay : getDays()) {
+			if (workDay.getLogs().size() > 0) {
+				List<WorkLog> dayList = new ArrayList<WorkLog>();
+				for (WorkLog log : workDay.getLogs()) {
+					dayList.add(log);
+				}
+				logsOfWeek.put(workDay, dayList);
+			}
 		}
-		return list;
+		return logsOfWeek;
 	}
 	
 	public WorkDay getDay(Calendar day){
