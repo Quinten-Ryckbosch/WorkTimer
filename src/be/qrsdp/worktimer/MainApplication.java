@@ -8,7 +8,6 @@ import java.util.List;
 
 import android.app.Application;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
@@ -19,8 +18,7 @@ import be.qrsdp.worktimer.data.WorkLog;
 import be.qrsdp.worktimer.data.WorkWeek;
 import be.qrsdp.worktimer.gui.Notification;
 
-public class MainApplication extends Application implements
-		OnSharedPreferenceChangeListener {
+public class MainApplication extends Application {
 	private final static String LOG_TAG = "MainApplication";
 
 	public static final String KEY_PREF_SHOW_NOTIFICATOIN = "PREF_SHOW_NOTIFICATION";
@@ -57,16 +55,24 @@ public class MainApplication extends Application implements
 		showYear = getTodaysYear();
 
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPref.registerOnSharedPreferenceChangeListener(this);
+		sharedPref.registerOnSharedPreferenceChangeListener(new WorkTimePreferenceChangeListener(this));
 		//TODO unregister at appropriate time (whenever that is...)
 		alwaysShowNotification = sharedPref.getBoolean(KEY_PREF_SHOW_NOTIFICATOIN, true);
 		workNetworkSSID = sharedPref.getString(KEY_PREF_WORK_SSID, "");
 		
 		// Create the notification
-		notification = new Notification(this, alwaysShowNotification);
+		setNotification(new Notification(this, alwaysShowNotification));
 		
 
 		super.onCreate();
+	}
+	
+	public Notification getNotification() {
+		return notification;
+	}
+
+	public void setNotification(Notification notification) {
+		this.notification = notification;
 	}
 	
 	public void resetWeekToShow() {
@@ -81,7 +87,7 @@ public class MainApplication extends Application implements
 			this.currentLog = dataBaseHelper.getCurrentLog();
 			this.atWork = (this.currentLog != null);
 			
-			notification.updateNotification(isAtWork());
+			getNotification().updateNotification(isAtWork());
 		}
 	}
 
@@ -158,7 +164,7 @@ public class MainApplication extends Application implements
 		atWork = !atWork;
 
 		// Change notification
-		notification.updateNotification(isAtWork());
+		getNotification().updateNotification(isAtWork());
 	}
 
 	public void toggleViaNetwork(boolean newState) {
@@ -179,7 +185,7 @@ public class MainApplication extends Application implements
 			this.atWork = newState;
 		}
 		// Change notification
-		notification.updateNotification(isAtWork());
+		getNotification().updateNotification(isAtWork());
 	}
 
 	public String getLogsList() {
@@ -232,22 +238,21 @@ public class MainApplication extends Application implements
 			showYear--;
 		}
 	}
+	
+	public boolean isAlwaysShowNotification() {
+		return alwaysShowNotification;
+	}
 
+	public void setAlwaysShowNotification(boolean alwaysShowNotification) {
+		this.alwaysShowNotification = alwaysShowNotification;
+	}
+	
 	public String getWorkNetworkSSID() {
 		return workNetworkSSID;
 	}
 
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		Log.d("Settings",key + " setting is changed");
-		if (key.equals(KEY_PREF_SHOW_NOTIFICATOIN)) {
-			alwaysShowNotification = sharedPreferences.getBoolean(key, true);
-
-			notification = new Notification(this, alwaysShowNotification);
-			notification.updateNotification(isAtWork());
-		}
-		if (key.equals(KEY_PREF_WORK_SSID)) {
-			workNetworkSSID = sharedPreferences.getString(key, "");
-		}
+	public void setWorkNetworkSSID(String workNetworkSSID) {
+		this.workNetworkSSID = workNetworkSSID;
 	}
 	
 	public void deleteLog(WorkLog log){
