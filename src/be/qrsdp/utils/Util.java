@@ -9,9 +9,9 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 import be.qrsdp.worktimer.MainApplication;
-import be.qrsdp.worktimer.WorkDay;
-import be.qrsdp.worktimer.WorkLog;
-import be.qrsdp.worktimer.WorkWeek;
+import be.qrsdp.worktimer.data.WorkDay;
+import be.qrsdp.worktimer.data.WorkLog;
+import be.qrsdp.worktimer.data.WorkWeek;
 
 public class Util {
 	

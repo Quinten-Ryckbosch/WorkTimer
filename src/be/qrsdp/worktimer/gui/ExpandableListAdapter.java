@@ -1,4 +1,4 @@
-package be.qrsdp.worktimer;
+package be.qrsdp.worktimer.gui;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,6 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import be.qrsdp.utils.Util;
+import be.qrsdp.worktimer.R;
+import be.qrsdp.worktimer.R.id;
+import be.qrsdp.worktimer.R.layout;
+import be.qrsdp.worktimer.data.WorkDay;
+import be.qrsdp.worktimer.data.WorkLog;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;

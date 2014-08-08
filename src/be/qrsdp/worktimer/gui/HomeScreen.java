@@ -16,11 +16,10 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import be.qrsdp.worktimer.ExpandableListAdapter;
 import be.qrsdp.worktimer.MainApplication;
 import be.qrsdp.worktimer.R;
-import be.qrsdp.worktimer.WorkDay;
-import be.qrsdp.worktimer.WorkLog;
+import be.qrsdp.worktimer.data.WorkDay;
+import be.qrsdp.worktimer.data.WorkLog;
 
 
 public class HomeScreen extends Activity {

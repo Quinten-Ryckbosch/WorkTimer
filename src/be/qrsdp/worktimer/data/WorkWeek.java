@@ -1,4 +1,4 @@
-package be.qrsdp.worktimer;
+package be.qrsdp.worktimer.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;

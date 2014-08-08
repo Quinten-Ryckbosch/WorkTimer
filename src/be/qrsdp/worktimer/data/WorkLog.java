@@ -1,4 +1,4 @@
-package be.qrsdp.worktimer;
+package be.qrsdp.worktimer.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,11 +14,11 @@ public class WorkLog implements Comparable<WorkLog> {
 	//Duration of this log in seconds;
 	private int duration = -1;
 	
-	WorkLog(){
+	public WorkLog(){
 		startWorkBlock();
 	}
 	
-	WorkLog(String startTime, String stopTime){
+	public WorkLog(String startTime, String stopTime){
 		this.startTime = parseWorkLog(startTime);
 		this.stopTime = parseWorkLog(stopTime);
 		current = (this.stopTime == null);

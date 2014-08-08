@@ -1,4 +1,4 @@
-package be.qrsdp.worktimer;
+package be.qrsdp.worktimer.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -48,6 +48,12 @@ public class WorkDay implements Comparable<WorkDay>{
 	}
 	
 	public int getDuration(){
+		if(isCurrent()){
+			duration = 0;
+			for(WorkLog it: todaysLogs){
+				duration += it.getDuration();
+			}
+		}
 		return duration;
 	}
 	
