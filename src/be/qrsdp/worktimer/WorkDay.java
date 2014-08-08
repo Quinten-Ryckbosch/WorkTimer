@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Locale;
 
-public class WorkDay extends WorkLog{
+public class WorkDay implements Comparable<WorkDay>{
 	private Calendar day;
 	private ArrayList<WorkLog> todaysLogs;
 	private int duration;

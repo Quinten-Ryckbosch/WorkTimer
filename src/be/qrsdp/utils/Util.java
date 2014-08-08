@@ -43,6 +43,7 @@ public class Util {
 		return time;
 	}
 	
+	
 	/**
 	 * Clean log for this week.
 	 * Only clean for one week, otherwise this would take to much time even without changing anything.

@@ -10,7 +10,7 @@ import java.util.Map;
 import be.qrsdp.utils.Util;
 
 
-public class WorkWeek extends WorkDay {
+public class WorkWeek implements Comparable<WorkWeek> {
 	int weeknumber, year;
 	Calendar firstDay;
 	Map<Integer, WorkDay> thisWeeksLogs;
@@ -40,7 +40,7 @@ public class WorkWeek extends WorkDay {
 	}
 
 	public void endWorkLog(WorkLog log) {
-		thisWeeksLogs.get(Util.getIndex(log.getStartTime())).endWorkBlock();
+		thisWeeksLogs.get(Util.getIndex(log.getStartTime())).endWorkLog(log);
 		
 		//update Duration
 		duration = 0;
