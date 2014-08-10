@@ -143,12 +143,6 @@ public class MainApplication extends Application {
 		}
 		return workWeeks.get(Util.getWeekIndex(weekNumber, year));
 	}
-
-	/*
-	 * OLDCODE
-	 * public WorkDay getWorkDayLog(Calendar cal) {
-		return getWorkWeek(cal).getDay(cal);
-	}*/
 	
 	public boolean addNewWorkLog(WorkLog log){
 		return getWorkWeek(log.getStartTime()).addWorkLog(log);

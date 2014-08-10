@@ -34,7 +34,11 @@ public class WorkWeek implements Comparable<WorkWeek> {
 		return firstDay;
 	}
 	
+	//FIXME If WorkDay is not present in the thisWeeksLogs map. Nullpointer is throws
 	public boolean addWorkLog(WorkLog log){
+		if(thisWeeksLogs.get(Util.getIndex(log.getStartTime())) == null){
+			thisWeeksLogs.put(Util.getIndex(log.getStartTime()), new WorkDay(log.getStartTime()));
+		}
 		thisWeeksLogs.get(Util.getIndex(log.getStartTime())).addWorkLog(log);
 		duration += log.getDuration();
 		return true;
