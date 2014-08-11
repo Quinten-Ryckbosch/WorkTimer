@@ -10,10 +10,10 @@ public class WorkDay implements Comparable<WorkDay>{
 	private ArrayList<WorkLog> todaysLogs;
 	private int duration;
 	
-	private WorkDay(){
-		todaysLogs = new ArrayList<WorkLog>();
-		duration = 0;
-	}
+//	private WorkDay(){
+//		todaysLogs = new ArrayList<WorkLog>();
+//		duration = 0;
+//	}
 	
 	public WorkDay(Calendar day) {
 		this.day = day;
